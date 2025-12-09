@@ -12,15 +12,15 @@ test <- dt[ind, ]
 rf <- ranger(enrolled ~ ., data = train, num.trees = 200
   , mtry = 3
   , importance = "impurity", probability = T)  
-p = predict(rf, data = test)
+p_out = predict(rf, data = test)
 # Different Importance outputs
 vip(rf, num_features = 20)
 
 pred_in <- predict(rf, data = train)
-pred_stat_in <- cut(pred$predictions[, 2], breaks = c(-1, .5, 1), labels = c(0, 1))
+pred_stat_in <- cut(pred_in$predictions[, 2], breaks = c(-1, .5, 1), labels = c(0, 1))
 length(which(pred_stat_in == train$enrolled))/length(train$enrolled)
 
-pred_stat_out <- cut(p$predictions[, 2], breaks = c(-1, .5, 1), labels = c(0, 1))
+pred_stat_out <- cut(p_out$predictions[, 2], breaks = c(-1, .5, 1), labels = c(0, 1))
 length(which(pred_stat_out == test$enrolled))/length(test$enrolled)
 
 

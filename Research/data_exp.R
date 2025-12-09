@@ -17,6 +17,10 @@ plot(pro$week, pro$Temp)
 ### Can then overlay a world map (packages: rworldmap, maps)
 
 # Research question: 
-# Model temperature as a function of Loc/Elev/Time
+# Model temperature as a function of Lat/Elev/Time
 # Look at different splits of the dependents, etc.
 # after accounting for latitude and time, is the effect of elevation linear or not
+# What is the explanation of why temperatures are colder at higher elevations?
+# Think about what might be the physical interpretations of WHY things interact the way they do
+### Do a little write-up about all the actual physical features that appear to be important
+### Do a little write-up about all the statistical features that appear to be important
