@@ -116,5 +116,5 @@ Sys.time()
 object_size_bytes <- object.size(data_red)
 print(format(object_size_bytes, units = "auto"))
 
-asDate(data_red[1, 3])
+
 
