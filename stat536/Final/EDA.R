@@ -1,7 +1,7 @@
 library(splines)
 
 dt <- read.csv('Germination.csv')
-dt <- dt[, -1]
+dt <- dt[, -c(1,3)]
 dt$Germinated <- ifelse(dt$Germinated == 'Y', 1, 0)
 dt <- dt[-which(dt$Population == 12), ]
 
@@ -52,15 +52,50 @@ for (year in years) {
   plot(means$ChillingTime, means$Germinated, main = title, xlab = 'ChillingTime', ylab = 'GerminatedRatio', ylim = c(0,1))
 }
 
-dat <- dt[which(dt$YearCollected == 2015), ]
-means <- aggregate(Germinated ~ ChillingTime, data = dat, FUN = mean)
-
-year_2016 <- dt[which(dt$YearCollected == 2016), ]
-unique(year_2016$)
-
-means <- aggregate(Germinated ~ YearCollected, data = dt, FUN = mean)
-plot(means$YearCollected, means$Germinated, xlab = 'Year', ylab = 'GerminatedRatio', ylim = c(0,1), xlim = c(2013, 2017))
 
 
-mod1 <- glm(Germinated ~ Population + bs(ChillingTime, degree = 2) + Population*ChillingTime, data = dt, family = binomial)
-summary(mod1)
+
+library(ranger)
+library(vip)
+library(pdp)
+library(ggplot2)
+
+set.seed(1337)
+train <- df <- data.frame(Population = integer(), ChillingTime = integer(), Germinated = numeric())
+test <- df <- data.frame(Population = integer(), ChillingTime = integer(), Germinated = numeric()) 
+
+for (i in 1:11) {
+  ind <- sample(1:210, 21)
+  pop_dat <- dt[which(dt$Population == i), ]
+  train <- rbind(train, pop_dat[-ind, ])
+  test <- rbind(test, pop_dat[ind, ])
+}
+train$Germinated <- as.factor(train$Germinated)
+train$Population <- as.factor(train$Population)
+test$Population <- as.factor(test$Population)
+
+log_mod <- glm(Germinated ~ Population + Population*bs(ChillingTime, degree = 2), data = train, family = binomial)
+
+rf <- ranger(Germinated ~ ., data = train, num.trees = 200, importance = "impurity", probability = T)  
+# Levels: '0' '1'
+
+log_cutoff <- .5
+log_is_p <- ifelse(log_mod$fitted.values >= log_cutoff, 1, 0)
+log_oos_p <- ifelse(predict(log_mod, newdata = test, type = 'response') >= log_cutoff, 1, 0)
+log_is_acc <- mean(log_is_p == train$Germinated)
+log_oos_acc <- mean(log_oos_p == test$Germinated)
+
+rf_cutoff <- .5
+rf_oos_p <- ifelse(predict(rf, data = test, type = 'response')$predictions[ ,2] >= rf_cutoff, 1, 0)
+rf_is_acc <- 1 - rf$prediction.error
+rf_oos_acc <- mean(rf_oos_p == test$Germinated)
+
+summary(log_mod)
+
+library(rpart)
+library(rpart.plot)
+library(tree)
+model_tree <- rpart(Germinated ~ ., data = train, control=list(cp = .01))
+rpart.plot(model_tree)
+plotcp(model_tree)
+install.packages('tree')

@@ -12,12 +12,22 @@ format:
     include-in-header:
       text: |
         \usepackage{caption}
-        \captionsetup{textfont={it}, font=small} 
+        \captionsetup{textfont={it}, font=small}
+        \usepackage[usenames,dvipsnames]{xcolor} 
         \usepackage{amsmath}
+        \usepackage{longtable}
+        \usepackage{booktabs}
         \AtBeginSection{}
 ---
 
 ```{r initialize}
+library(rpart)
+library(rpart.plot)
+library(splines)
+library(ranger)
+library(knitr)
+library(dplyr)
+library(kableExtra)
 set.seed(1337)
 dt <- read.csv('Germination.csv', stringsAsFactors = TRUE)
 dt$Population <- as.factor(dt$Population)
@@ -26,16 +36,18 @@ dt <- dt[, -1]
 dt$Germinated <- ifelse(dt$Germinated == 'Y', 1, 0)
 ```
 
-# Introduction/Abstract
+# Abstract
 
 ## Abstract
 Tulips form a significant portion of the exports from the Netherlands. We want to understand what changes can be made to ensure tulip growth is not impacted by the changing climate. 
 
-We used a XXXXX model and found:
+We used a logistic model and found:
 
-- Effect of chilling times on germination is dependent on species: some improve with longer chilling, some get worse with chilling
+- Effect of chilling times on germination is dependent on species (some improve with longer chilling, some get worse with chilling)
 - Ideal chilling time for each population (for most, range of 8-10 weeks)
-- Predicted impact of the chilling time decreasing from 10 weeks to 9 (some species do worse, some very much worse, and one does a little better)
+- Predicted impact of the chilling time decreasing from 10 weeks to 9 (some do marginally better, but some do much worse)
+
+# Introduction
 
 ## Context
 Tulip Production: 
@@ -47,7 +59,7 @@ Tulip Production:
 Dataset of sample tulip growth populations:
 
 - Year they were grown
-- Number weeks the bulbs were chilled
+- Number of weeks the bulbs were chilled
 - Whether or not the bulb germinated
 - Indices (can be removed from dataset)
 
@@ -81,21 +93,16 @@ dt <- dt[-pop_12_ind, ]
 - Removing year from models
 
 ## EDA - Interactions - Population vs. Chilling
-```{r pop_chilling_plots, fig.height=5}
+```{r interaction_plots, fig.height=4}
 #| fig-cap: "Sample interaction plots of population and chilling. Some behave similarly, others are vastly different. Note the non-linearity of some populations."
 
-# Similar Populations: 2, 3 | 6, 7
-# Interesting interactions: 1, 5, 8, 9
-pops <- c(1, 2, 3, 5, 6, 7, 8, 9)
-par(mfrow = c(2, 4))
+pops <- c(1, 5, 6)
+par(mfrow = c(1, 3))
 for (pop in pops) {
   pop_dat <- dt[which(dt$Population == pop), ]
   means <- aggregate(Germinated ~ ChillingTime, data = pop_dat, FUN = mean)
   title <- paste0('Population: ', pop)
-  col <- ifelse(pop %in% c(2,3), "red", ifelse(pop %in% c(6, 7), "blue", "black"))
-  lwd <- ifelse(pop %in% c(2,3, 6, 7), 3, 1)
   plot(means$ChillingTime, means$Germinated, main = title, xlab = 'ChillingTime', ylab = 'GerminatedRatio', ylim = c(0,1))
-  box(col = col, lwd = lwd)
 }
 par(mfrow = c(1, 1))
 ```
@@ -119,14 +126,15 @@ Need to account for the following:
 # Methodology
 
 ## Proposed Models - 1
-Logistic Model - Interactions and spline
+Logistic Model
 
 \begin{equation}
 \begin{split}
-Y_n = & ln(\frac{p}{1-p}) = \beta_0 + \beta_1 X_{pop} + \beta_2 bs(ChillingTime) \\
-     & + \beta_3 (X_{pop} * ChillingTime)
+Y_n = & ln(\frac{p}{1-p}) = \beta_0 + \beta_1 X_{pop} + \boldsymbol{\beta_c} poly(ChillingTime) \\
+     & + \boldsymbol{\beta_i} (X_{pop} * poly(ChillingTime))
 \end{split}
 \end{equation}
+
 
 - Accounts for interactions of population and year on ChillingTime
 - Accounts for non-linearity of ChillingTime
@@ -146,7 +154,6 @@ Assumptions - Indepndence, Monotonocity
 
 - Independence: Assumed due to the design of the experiment
 - Monotonicty
-    - Shown in below graph, Germination rate is acceptably monotonic
 
 ```{r monotonicity, fig.width = 5, fig.height = 2.75}
 plot(dt$ChillingTime,jitter(dt$Germinated), main = 'Germination vs. Chilling Time', xlab = 'Chilling Time', ylab = 'Germinated (yes/no)')
@@ -158,50 +165,191 @@ lines(dt$ChillingTime[order(dt$ChillingTime)], predict(smooth_fit)[order(dt$Chil
 ## Proposed Models - 2
 Random Forest
 
-SAMPLE TREE IMAGE
-
+:::::::::::::: {.columns}
+::: {.column width="50%"}
 Strengths:
 
 - Relatively explainable (lots of trees, each tree gets a vote, average the votes, compare to cutoff)
+- No inherent assumptions (besides the data being 'good')
 
 Weaknesses:
 
 - Can be prone to overfitting
 
+:::
+::: {.column width="50%"}
+```{r sample_tree}
+#| fig-cap: "Sample tree with cp = .01"
+set.seed(1337)
+model_tree <- rpart(Germinated ~ ., data = dt, control=list(cp = .01))
+rpart.plot(model_tree)
+```
+
+:::
+::::::::::::::
+
+
 ## Model Evaluation/Selection
 
 ```{r models} 
-library(splines)
-library(ranger)
-log_mod <- glm(Germinated ~ Population + bs(ChillingTime, degree = 3) + Population*bs(ChillingTime, degree = 3), data = dt, family = binomial)
+# Initialize dfs for train/test data
+set.seed(1337)
+train <- df <- data.frame(Population = integer(), ChillingTime = integer(), Germinated = numeric())
+test <- df <- data.frame(Population = integer(), ChillingTime = integer(), Germinated = numeric()) 
 
+# Get an equal sample from each population
+for (i in 1:11) {
+  ind <- sample(1:210, 21)
+  pop_dat <- dt[which(dt$Population == i), ]
+  train <- rbind(train, pop_dat[-ind, ])
+  test <- rbind(test, pop_dat[ind, ])
+}
+train$Germinated <- as.factor(train$Germinated)
+train$Population <- as.factor(train$Population)
+test$Population <- as.factor(test$Population)
 
+log_mod <- glm(Germinated ~ Population + Population*poly(ChillingTime, degree = 2), data = train, family = binomial)
+
+rf <- ranger(Germinated ~ ., data = train , num.trees = 200, importance = "impurity", probability = T)  
+# Levels: '0' '1'
+
+log_cutoff <- .5
+log_is_p <- ifelse(log_mod$fitted.values >= log_cutoff, 1, 0)
+log_oos_p <- ifelse(predict(log_mod, newdata = test, type = 'response') >= log_cutoff, 1, 0)
+log_is_acc <- round(mean(log_is_p == train$Germinated), 4)
+log_oos_acc <- round(mean(log_oos_p == test$Germinated), 4)
+
+rf_cutoff <- .5
+rf_oos_p <- ifelse(predict(rf, data = test, type = 'response')$predictions[ ,2] >= rf_cutoff, 1, 0)
+rf_is_acc <- round(1 - rf$prediction.error, 4)
+rf_oos_acc <- round(mean(rf_oos_p == test$Germinated), 4)
 ```
 
-COMPARE IN SAMPLE AND OUT OF SAMPLE PREDICTION
-ESPECIALLY LOOK AT INTERPRETABILITY
+| Model    | In-Sample Accuracy | Out-of-Sample Accuracy |
+| :------: | :----------------: | :--------------------: |
+| Logistic | `r log_is_acc`     | `r log_oos_acc`        |
+| Forest   | `r rf_is_acc`      | `r rf_oos_acc`         |
 
+- Random Forest does marginally better in accuracy
+- Logistic model is much more interpretable
+- Logistic model more clearly answers research questions
 
+Will use the Logistic model to answer reserach questions
+
+- Coefficients provided in Appendix
 
 # Results
 
 ## Effect of Chilling Time
 
+:::::::::::::: {.columns}
+::: {.column width="25%"}
+3 types:
+
+- Step-functions: above a certain value appears to be steady rate
+- Increase up to a value, then decrease
+- Primarily decreasing
+:::
+::: {.column width="75%"}
+```{r pop_chilling_plots}
+#| fig-cap: "Plots of chilling time on germination by population"
+
+# Similar Populations: 2, 3 | 6, 7
+# Interesting interactions: 1, 5, 8, 9
+par(mfrow = c(3, 4))
+for (pop in c(1:11)) {
+pop_dat <- dt[which(dt$Population == pop), ]
+means <- aggregate(Germinated ~ ChillingTime, data = pop_dat, FUN = mean)
+title <- paste0('Population: ', pop)
+if (pop %in% c(2,3)) {col <- 'green'}
+else if (pop == 5) {col <- 'red'}
+else if (pop %in% c(4, 6, 7, 11)) {col <- 'blue'}
+else {col <- 'black'}
+lwd <- ifelse(pop %in% c(2, 3, 4, 5, 6, 7, 11), 3, 1)
+plot(means$ChillingTime, means$Germinated, main = title, xlab = 'ChillingTime', ylab = 'GerminatedRatio', ylim = c(0,1))
+box(col = col, lwd = lwd)
+}
+par(mfrow = c(1, 1))
+```
+
+:::
+::::::::::::::
+
 
 ## Ideal Chilling Time
+
+Used model to identify ideal values:
+
+```{r ideal_chilling}
+n <- 1000
+chill_ideal <- as.data.frame(c(1:11))
+colnames(chill_ideal) <- 'Population'
+chill_ideal$IdealChillWeeks <- c(1:11)
+for (i in 1:11) {
+    Population <- rep(i, n)
+    ChillingTime <- seq(0, 12, length = n)
+    df <- as.data.frame(cbind(Population, ChillingTime))
+    df$Population <- as.factor(df$Population)
+    pred <- predict(log_mod, df)
+    chill_ideal$IdealChillWeeks[i] <- round(ChillingTime[which.max(pred)], 3)
+}
+
+kable(chill_ideal, align = "c")
+```
 
 
 ## Effect of Decrease in Chilling Time
 
+Used model to calculate difference in Germination rate at 9 vs. 10 weeks:
+
+```{r chilling_diff}
+chill_diff <- as.data.frame(c(1:11))
+colnames(chill_diff) <- 'Population'
+chill_diff$GerminationDiff <- character(11)
+for (i in 1:11) {
+    Population <- c(i, i)
+    ChillingTime <- c(9, 10)
+    df <- as.data.frame(cbind(Population, ChillingTime))
+    df$Population <- as.factor(df$Population)
+    pred <- predict(log_mod, df, type = 'response')
+    chill_diff$GerminationDiff[i] <- paste0(round(100 * (pred[1] - pred[2]), 2), '%')
+}
+
+chill_diff <- chill_diff %>%
+  mutate(
+    GerminationDiff = cell_spec(
+      GerminationDiff,
+      color = ifelse(GerminationDiff > 0, "ForestGreen", "Red")
+    )
+  )
+
+chill_diff %>%
+  kbl(escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+```
 
 # Conclusion
 
 ## Summary
 
+Used the provided tulips data to:
+
+- Identify that impact of chilling time on germination rate depends on species (most increase with chilling time, some decrease)
+- Identify the ideal chilling time for each species (for most, range of 8-10)
+- Predict the impact of chilling time decreasing from 10 to 9 weeks on germination rate (some marginal increases, but several large decreases)
+
 ## Next Steps
+
+To improve our understanding of tulip chilling time on germination rate we suggest:
+
+- Increased resolution of chilling times (ie. get samples of every week, maybe even per day)
+- With risk of rising sea levels, test different humidity levels, soil saturation, etc. (effects of more moisture)
 
 
 # Appendix
 
-## STUFF IF NEEDED
+## Table of Coefficients {.allowframebreaks}
 
+```{r coefs}
+kable(log_mod$coefficients, booktabs = TRUE, longtable = TRUE)
+```
