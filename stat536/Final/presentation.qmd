@@ -1,0 +1,207 @@
+---
+title: "Final Project"
+author: "RJ Cass"
+execute:
+  echo: false
+format: 
+  beamer:
+    theme: Madrid
+    colortheme: dolphin
+    slide-level: 2
+    toc: true
+    include-in-header:
+      text: |
+        \usepackage{caption}
+        \captionsetup{textfont={it}, font=small} 
+        \usepackage{amsmath}
+        \AtBeginSection{}
+---
+
+```{r initialize}
+set.seed(1337)
+dt <- read.csv('Germination.csv', stringsAsFactors = TRUE)
+dt$Population <- as.factor(dt$Population)
+#dt$YearCollected <- as.factor(dt$YearCollected)
+dt <- dt[, -1]
+dt$Germinated <- ifelse(dt$Germinated == 'Y', 1, 0)
+```
+
+# Introduction/Abstract
+
+## Abstract
+Tulips form a significant portion of the exports from the Netherlands. We want to understand what changes can be made to ensure tulip growth is not impacted by the changing climate. 
+
+We used a XXXXX model and found:
+
+- Effect of chilling times on germination is dependent on species: some improve with longer chilling, some get worse with chilling
+- Ideal chilling time for each population (for most, range of 8-10 weeks)
+- Predicted impact of the chilling time decreasing from 10 weeks to 9 (some species do worse, some very much worse, and one does a little better)
+
+## Context
+Tulip Production: 
+
+- Tulip products form 25% of agricultural exports from the Netherlands
+- Changing climate puts the tulip industry at risk
+- Want to understand how to adapt to these changes and protect the industry
+
+Dataset of sample tulip growth populations:
+
+- Year they were grown
+- Number weeks the bulbs were chilled
+- Whether or not the bulb germinated
+- Indices (can be removed from dataset)
+
+## Questions of Interest
+We want to use the provided data to answer the following questions:
+
+1. What is the eﬀect of chilling time for the diﬀerent species of tulips? Is it the same across the species? Which species are the same/diﬀerent?
+
+2. Is there an ideal chilling time for each species? If so, is it the same for all species?
+
+3. Given climate change conditions, winters are expected to decrease from 10 to 9 weeks in the coming few years. What eﬀect will this decrease in chilling time have on the probability of germination for each species? Is it the same for all species?
+
+# Exploratory Data Analysis
+
+## EDA - Population 12
+None of population 12 germinated. We removed it from the dataset to not dilute the rest of the data
+```{r pop_12_chill_plots, fig.width=4, fig.height=3}
+#| fig-cap: "Population 12 had a 0% germination rate across all chilling times"
+pop_12_ind <- which(dt$Population == 12)
+pop_12 <- dt[pop_12_ind, ]
+means <- aggregate(Germinated ~ ChillingTime, data = pop_12, FUN = mean)
+plot(means$ChillingTime, means$Germinated, xlab = 'ChillingTime', ylab = 'GerminatedRatio', ylim = c(0,1))
+dt <- dt[-pop_12_ind, ]
+```
+
+## EDA - Year
+
+- Each population was tested in only 1 year (ie. no crossing with different years having an effect on one population)
+- Physically, given testing conditions, we don't expect year to have an impact on germination
+- In variable selection, Year was not important (p > .05)
+- Removing year from models
+
+## EDA - Interactions - Population vs. Chilling
+```{r pop_chilling_plots, fig.height=5}
+#| fig-cap: "Sample interaction plots of population and chilling. Some behave similarly, others are vastly different. Note the non-linearity of some populations."
+
+# Similar Populations: 2, 3 | 6, 7
+# Interesting interactions: 1, 5, 8, 9
+pops <- c(1, 2, 3, 5, 6, 7, 8, 9)
+par(mfrow = c(2, 4))
+for (pop in pops) {
+  pop_dat <- dt[which(dt$Population == pop), ]
+  means <- aggregate(Germinated ~ ChillingTime, data = pop_dat, FUN = mean)
+  title <- paste0('Population: ', pop)
+  col <- ifelse(pop %in% c(2,3), "red", ifelse(pop %in% c(6, 7), "blue", "black"))
+  lwd <- ifelse(pop %in% c(2,3, 6, 7), 3, 1)
+  plot(means$ChillingTime, means$Germinated, main = title, xlab = 'ChillingTime', ylab = 'GerminatedRatio', ylim = c(0,1))
+  box(col = col, lwd = lwd)
+}
+par(mfrow = c(1, 1))
+```
+
+## EDA - Summary
+
+Removing from dataset:
+
+- Population 12
+- 'Year' variate
+
+Need to account for the following: 
+
+- Interaction between Chilling Time and Population
+    - Will need to ensure model includes interactions (either manually, or use a model that explores interactions)
+    - If not included, resulting model will not capture the full impact of each variate
+- Non-linearity of relationship between chilling time and germination rate
+    - Will need to ensure the model handles non-linearity
+    - If not included, model will not represent the correct relationship of this variate
+
+# Methodology
+
+## Proposed Models - 1
+Logistic Model - Interactions and spline
+
+\begin{equation}
+\begin{split}
+Y_n = & ln(\frac{p}{1-p}) = \beta_0 + \beta_1 X_{pop} + \beta_2 bs(ChillingTime) \\
+     & + \beta_3 (X_{pop} * ChillingTime)
+\end{split}
+\end{equation}
+
+- Accounts for interactions of population and year on ChillingTime
+- Accounts for non-linearity of ChillingTime
+
+Strengths:
+
+- Captures interactions
+- The concept of logistic (change in log-odds) is realtively interpretable
+
+Weaknesses:
+
+- Using splines loses interpretability
+
+## Proposed Models - 1 - Cont'd
+
+Assumptions - Indepndence, Monotonocity
+
+- Independence: Assumed due to the design of the experiment
+- Monotonicty
+    - Shown in below graph, Germination rate is acceptably monotonic
+
+```{r monotonicity, fig.width = 5, fig.height = 2.75}
+plot(dt$ChillingTime,jitter(dt$Germinated), main = 'Germination vs. Chilling Time', xlab = 'Chilling Time', ylab = 'Germinated (yes/no)')
+smooth_fit <- loess(dt$Germinated ~ dt$ChillingTime)
+lines(dt$ChillingTime[order(dt$ChillingTime)], predict(smooth_fit)[order(dt$ChillingTime)], col = "red", lwd = 2)
+```
+
+
+## Proposed Models - 2
+Random Forest
+
+SAMPLE TREE IMAGE
+
+Strengths:
+
+- Relatively explainable (lots of trees, each tree gets a vote, average the votes, compare to cutoff)
+
+Weaknesses:
+
+- Can be prone to overfitting
+
+## Model Evaluation/Selection
+
+```{r models} 
+library(splines)
+library(ranger)
+log_mod <- glm(Germinated ~ Population + bs(ChillingTime, degree = 3) + Population*bs(ChillingTime, degree = 3), data = dt, family = binomial)
+
+
+```
+
+COMPARE IN SAMPLE AND OUT OF SAMPLE PREDICTION
+ESPECIALLY LOOK AT INTERPRETABILITY
+
+
+
+# Results
+
+## Effect of Chilling Time
+
+
+## Ideal Chilling Time
+
+
+## Effect of Decrease in Chilling Time
+
+
+# Conclusion
+
+## Summary
+
+## Next Steps
+
+
+# Appendix
+
+## STUFF IF NEEDED
+

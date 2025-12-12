@@ -33,7 +33,7 @@ net = nn_module(
   initialize = function(){
     self$linear1 = nn_linear(41,128) # Start with columns in the X matrix
     self$linear2 = nn_linear(128,64)
-    self$linear3 = nn_linear(64,64)
+    #self$linear3 = nn_linear(64,64)
     self$linear4 = nn_linear(64,9) # End with classification categories
     
   },
@@ -43,8 +43,8 @@ net = nn_module(
       nnf_hardtanh() %>%
       self$linear2() %>%
       nnf_hardtanh() %>%
-      self$linear3() %>%
-      nnf_hardtanh() %>%
+      #self$linear3() %>%
+      #nnf_hardtanh() %>%
       self$linear4() %>%
       nnf_softmax(2)
   }
@@ -117,3 +117,8 @@ cat("Test", "Loss:", loss_test$item(),"Accuracy:", accuracy_test, "\n")
 
 
 
+library(rpart)
+library(rpart.plot)
+tree.model <- rpart(department~., data=comp, subset=ind, method="class", control=rpart.control(cp=.025))
+final.rpart <- prune(tree.model, cp=tree.model$cptable[which.min(tree.model$cptable[,"xerror"]),"CP"])
+rpart.plot(final.rpart)
