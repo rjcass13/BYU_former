@@ -1,13 +1,18 @@
-\documentclass[twocolumn]{article}
+%\documentclass[twocolumn]{article}\
+\documentclass{article}
 \usepackage{amsmath, amssymb, cancel, mathtools, bm}
 \usepackage[left=.5in, right=.5in, top=1in, bottom=1in]{geometry}
 \usepackage[most]{tcolorbox}
-\def\disobeylines{\catcode`\^^M=5 } % Ability to turn off the obeylines command
+\usepackage[skip=1em,indent=0pt]{parskip}
 \setlength{\parindent}{0pt}
 \newcommand{\statvec}[1]{\underset{\sim}{\bm{#1}}} % Vector symbol (tilde under vector)
 \DeclareMathOperator{\EX}{\mathbb{E}} % Expected Value symbol
 \newcommand{\indep}{\perp\!\!\!\!\perp} % Independence symbol
 \newcommand{\real}{\mathbb{R}} % Simplified 'Reals' indicator
+\newcommand{\pto}{\overset{P}{\to}} % Simplified 'Reals' indicator
+\newcommand{\asto}{\overset{a.s.}{\to}} % Simplified 'Reals' indicator
+\newcommand{\rthto}{\overset{L^r}{\to}} % Simplified 'Reals' indicator
+\newcommand{\dto}{\overset{D}{\to}} % Simplified 'Reals' indicator
 % Force all aggregate symbols to always put values above/below
 \let\Oldint=\int
 \let\Oldsum=\sum
@@ -26,11 +31,17 @@
 
 
 \begin{document}
-\obeylines
 
-\section*{Sets}
+\tableofcontents
 
-\subsection*{Set Identities}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Sets}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Set Identities}
 
 Union: $A \cup B$ : $\{x \epsilon \mathbb{S} : x \epsilon A \text{ OR } x \epsilon B\}$
 Intersection: $A \cap B$ : $\{x \epsilon \mathbb{S} : x \epsilon A \text{ AND } x \epsilon B\}$
@@ -39,38 +50,45 @@ Difference: $A - B$ : $\{x \epsilon \mathbb{S} : x \epsilon A \text{, } x \cance
 Infinite Union: $\bigcup_{i=1}^{\infty} A_i$ : $\{x \epsilon \mathbb{S}, x \epsilon A_i \ni A_i\}$
 Infinite Intersection: $\bigcap_{i=1}^{\infty} A_i$ : $\{x \epsilon \mathbb{S}, x \epsilon A_i \forall A_i\}$
 
-\subsection*{Set Relationships}
+\subsection{Set Relationships}
 Containment: $ A \subseteq B$ (A is a subset of B): $x \epsilon A$ means $x \epsilon B$
 Equality: Two sets are equal if they contain each other: $A = B \therefore A \subseteq B, B \subseteq A$
 Disjoint: $ A \cap B = \{\}$
 
-\subsection*{Set Properties}
+\subsection{Set Properties}
 Commutativity: $A \cup B = B \cup A$, $A \cap B = B \cap A$
 Associativity: $A \cup (B \cup C) = (A \cup B) \cup C$, $A \cap (B \cap C) = (A \cap B) \cap C$
 Distributive: $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$, $A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$
 DeMorgan's Law: $(A \cup B)^c = A^c \cap B^c$, $(A \cap B)^c = A^c \cup B^c$
 
-\section*{Sigma Algebras}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Sigma Algebras}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection*{Identity}
+\subsection{Identity}
 A collection of subsets of $S$ is a $\sigma$-algebra ($\mathbb{B}$) iff: 
 a. $\emptyset \epsilon \mathbb{B}$
 b. $A \epsilon \mathbb{B} \implies A^c \epsilon \mathbb{B}$
 c. $A_1, A_2, ... \epsilon \mathbb{B} \implies \bigcup_{n=1}^{\infty} A_n \epsilon \mathbb{B}$
 
-\subsection*{Construction}
-$S$ is finite/countable: $\mathbb{B} = \mathbb{P}(\mathbb{S})$ (Power Set of $\mathbb{S}$, all possible subsets of $\mathbb{S}$)\\
+\subsection{Construction}
+$S$ is finite/countable: $\mathbb{B} = \mathbb{P}(\mathbb{S})$ (Power Set of $\mathbb{S}$, all possible subsets of $\mathbb{S}$)
 
 $S$ is infinite/uncountable: Use Borel sets: $\mathbb{B} = \{(a, b), [a, b), [a,b]\}$ for $a < b$ and all countable $\cup$ and $\cap$ of those
 
-\section*{Probability Functions}
-\subsection*{Axioms}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Probability Functions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Axioms}
 Given $\mathbb{S}$ and $\sigma$-algebra, a probability function with domain $\mathbb{B}$ satisfies:
 a. $P(A) \ge 0$ for all $A \epsilon \mathbb{B}$
 b. $P(\mathbb{S}) = 1$
 c. If $A_1, A_2, ...$ are pairwise disjoint, then $P(\bigcup_{n=1}^{\infty} A_n) = \sum_{n=1}^{\infty} P(A_n)$
 
-\subsection*{Properties}
+\subsection{Properties}
 1) $P(\emptyset) = 0$
 2) $A \subseteq \mathbb{S} \implies P(A) \le 1$
 3) $P(A^c) = 1 - P(A)$
@@ -81,59 +99,67 @@ c. If $A_1, A_2, ...$ are pairwise disjoint, then $P(\bigcup_{n=1}^{\infty} A_n)
     - $P(A) = \sum_{i=1}^{\infty} P(A \cap c_i)$
 8) For any $A_1, A_2, ...$; $P(\bigcup_{i=1}^{\infty} A_i) \le \sum_{i=1}^{\infty} P(A_i)$
 
-\section*{Counting}
-\subsection*{Sampling}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Counting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Sampling}
 \begin{tabular}{ccc}
   \textbf{} & \textbf{w/o Repl.} & \textbf{w/ Repl.} \\
   \textbf{Ordered Perm.} & \fbox{$\frac{n!}{(n-1)!}$} & \fbox{$n^r$} \\
   \textbf{Unordered Comb.} & \fbox{$\frac{n!}{(n-r)!r!} : \binom{n}{r}$} & \fbox{$\binom{n+r-1}{r}$} \\
 \end{tabular}
 
-\subsection*{Axioms}
+\subsection{Axioms}
 Enumerating equally likely outcomes (assume large but finite $\mathbb{S}, |\mathbb{S}| = N$). Want $P(A)$ where $A \subset \mathbb{S}, A \epsilon \mathbb{B}$
-- $P(A) = \frac{\text{\# things in A}}{N}$\\
+- $P(A) = \frac{\text{\# things in A}}{N}$
 
 Product Rule:
-- If a job consists of $k$ separate experiments, the $i^{th}$ of which can be done in $n_i$ ways, then the job can be done in $n_1 * n_2 * ... * n_k$ ways\\
+- If a job consists of $k$ separate experiments, the $i^{th}$ of which can be done in $n_i$ ways, then the job can be done in $n_1 * n_2 * ... * n_k$ ways
 
 Sum Rule: 
 - If there are $k$ events, the $i^{th}$ of which can occur in $n_i$ ways, then there are $n_1+n_2+ ... +n_k$ to complete exactly 1 event
 Inclusion/Exclusion: want to enumerate elements in $A: N_A = |A|$, sometimes easier to find:
 - $N_{A^c} = |A^c| \therefore N_A = N - N_{A^c}$
 
-\subsection*{Continous}
+\subsection{Continous}
 Consider $\mathbb{S} \subset \mathbb{R}^d$ with uniform probability
 Then for $A \subseteq \mathbb{S}, P(A) = \frac{\int_{A}ds}{\int_{\mathbb{S}ds}}$
 
-\subsection*{Conditional Probability}
+\subsection{Conditional Probability}
 If $A, B \subseteq \mathbb{S} \text{ and } P(B) > 0$; 
 $P(A|B) = \frac{P(A \cap B)}{P(B)} = \frac{P(B|A)P(A)}{P(B)}$
 Often use the law of total probability ($c_i \cap c_j = \emptyset \text{ for } i \ne j, \bigcup_{i=1}^{\infty}c_i = \mathbb{S}$):
 $P(B) = \sum_{i=1}^{n}P(B|c_i)P(c_i)$
 
-\subsection*{Independence}
+\subsection{Independence}
 $A \indep B$ iff $P(A|B) = P(A)$
 $A \indep B \implies A \indep B^c, A^c \indep B, A^c \indep B^c$
 Mutual Indepedence:
 A collection of events $A_1, ..., A_n$ are mut. ind. if, for any subcollection of $A_{i_1}, ..., A_{i_k}$ we have:
 - $P(\bigcap_{j=1}^{k}A_{i_j}) = \prod_{j=1}^{k} P(A_{i_j})$
 
-\subsection*{Conditional Independence}
+\subsection{Conditional Independence}
 $A$ and $B$ are conditionally independent given $C$ if:
 $P([A \cap B]|C) = P(A|C)P(B|C)$
 
-\section*{Random Variables}
-\subsection*{Definition}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Random Variables}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Definition}
 A random variable (vector) is a function that maps from the sample space $\mathbb{S}$ to the real numbers $\mathbb{R}$
 Formally: $X: \mathbb{S} \Rightarrow \mathbb{R}, \statvec{X}: \mathbb{S} \Rightarrow \mathbb{R}$
 
-\subsection*{Cumulative Distribution Function}
+\subsection{Cumulative Distribution Function}
 The CDF of a random variable ($F_X(x)$) is defined as: $P(X \le x)$ for all $x \epsilon \mathbb{R}$
 a. $\lim_{x\to-\infty} F_X(x) = 0, \lim_{x\to\infty} F_X(x) = 1$
 b. $F_X(x)$ is non-decreasing ie. for $x_i \le x_2, F(x_1) \le F(x_2)$
 c. $F_X(x)$ is right-conitnuous ie. $\lim_{x\downarrow x_0} F_X(x) = F_X(x_0)$
 
-\subsection*{Probability Density/Mass Function}
+\subsection{Probability Density/Mass Function}
 A PMF is given by $f_X(x) = P(X = x)$
 A PDFof a continuous random variable satisfies the following:
 - $\int_{-\infty}^{x}f_x(t) dt \text{ for all } x \therefore f(X) = \frac{dF_x}{dx}$
@@ -142,13 +168,13 @@ A function is a valid PMF/PDF iff:
 a) $f_X(x) \ge 0, \forall x$
 b) $\sum_{x \epsilon X} f_X(x) = 1$ -OR- $\int_{x} f_X(x)dx = 1$
 
-\subsection*{Kernel}
+\subsection{Kernel}
 Any non-negative function with a finite integral or sum can be made into a PDF or PMF
 - $h(x) \ge 0 \forall x$
 - $\int_{x \epsilon X} h(x)dx = k, 0 < k < \infty$
 - $f_X(x) = \frac{1}{k} h(x) I_X(x)$
 
-\subsection*{Common PDFs}
+\subsection{Common PDFs}
 Besides those given in the book:
 - Survival Function: $S_X(x) = P(X > x) = 1 - F_X(x)$
 - Hazard Function: $H_X(x) = \frac{f_X(x)}{S_X(x)}$
@@ -157,11 +183,15 @@ Besides those given in the book:
 - - For general $\alpha$: $\Gamma(\alpha + 1) = \alpha \Gamma(\alpha)$
 - - Also: $\Gamma(\frac{1}{2}) = \sqrt{\pi}$
 
-\section*{Expected Value}
-\subsection*{Definition}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Expected Value}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Definition}
 Given a random variable $g(x)$:
 
-\disobeylines
+
 \begin{math}
   \EX[g(x)]=\left\{
     \begin{array}{ll}
@@ -170,34 +200,38 @@ Given a random variable $g(x)$:
     \end{array}
   \right.
 \end{math}
-\obeylines\\
+
 
 Law of Unconscious Statistician: Let $Y = g(x)$
-- $\EX[g(x)] = \infint g(x) f_X(x) dx = \infint Y f_Y(y) dy = \EX[Y]$\\
+- $\EX[g(x)] = \infint g(x) f_X(x) dx = \infint Y f_Y(y) dy = \EX[Y]$
 
 Probability as an Expectation:
 $P(x \epsilon A) = \int_A f_X(x) dx = \infint I_A(x)f_X(x) dx = \EX[I_A(x)]$
 
-\subsection*{Properties of Expected Values}
+\subsection{Properties of Expected Values}
 1) $\EX[ax + b] = a\EX[x] + b, \EX[a g_1(x) + b g_2(x)] = a\EX[g_1(x)] + b\EX[g_2(x)]$
 2) If $g(x) \ge 0, \forall x \epsilon X$, then $\EX[g(x)] \ge 0$
 3) If $g_1(x) \ge g_2(x), \forall x \epsilon X$, then $\EX[g_1(x)] \ge \EX[g_2(x)]$
 4) If $a \le g(x) \le, \forall x \epsilon X$, then $a \le \EX[g(x)] \le b$
 
-\section*{Moments}
-\subsection*{Definition}
-For each interger $n$, the $n^{th}$ moment of $X$ is $\EX[X^n]$
-The $n^{th}$ central moment is: $\EX[X - \EX[X]]^n$\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Moments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Expected value is the first moment, Variance is the second central moment\\
+\subsection{Definition}
+For each interger $n$, the $n^{th}$ moment of $X$ is $\EX[X^n]$
+The $n^{th}$ central moment is: $\EX[X - \EX[X]]^n$
+
+Expected value is the first moment, Variance is the second central moment
 
 Properties of Variance:
 - $Var(aX + b) = a^2 Var(X)$
 - $Var(X) = \EX[X^2] - (\EX[X])^2$
 
-\subsection*{Jensen's Inequality}
+\subsection{Jensen's Inequality}
 Want to compare $\EX[X]$ vs. $\EX[Y]$ where $Y = g(X)$. Often can't directly compare.
-\disobeylines
+
 \begin{math}
   JE: \left\{
     \begin{array}{ll}
@@ -206,15 +240,15 @@ Want to compare $\EX[X]$ vs. $\EX[Y]$ where $Y = g(X)$. Often can't directly com
     \end{array}
   \right.
 \end{math}
-\obeylines\\
+
 
 How to tell if $g(x)$ is convex:
 - Draw it (convex is bowl-shaped)
 - Second Derivative: $g''(x) > 0 \implies $ convex
 
 
-\subsection*{Moment Generating Function (MGF)}
-\disobeylines
+\subsection{Moment Generating Function (MGF)}
+
 \begin{math}
   M_X(t) = \EX[e^{tx}] =  \left\{
     \begin{array}{ll}
@@ -223,36 +257,41 @@ How to tell if $g(x)$ is convex:
     \end{array}
   \right.
 \end{math}
-\obeylines\\
 
-This holds if the expectation exists for $t$ in the neighborhood of 0. That is, there exists an $h > 0$ such that $\EX(e^{tx})$ exists for all $-h < t < h$\\
+
+This holds if the expectation exists for $t$ in the neighborhood of 0. That is, there exists an $h > 0$ such that $\EX(e^{tx})$ exists for all $-h < t < h$
 
 $\EX[X^n] = M_X^{(n)}(0) = \frac{dn}{dt^n} M_x(t) |_{t=0}$
 
 
-\subsection*{Characterizing Distributions}
+\subsection{Characterizing Distributions}
 a) If X and Y have bounded support, $F_X(u) = F_Y(u)$ for all $u$ iff $\EX[X^r] = \EX[Y^r]$, $r = 0, 1, 2, 3, ...$ (all moments are equal)
-b) If MGF exists $M_X(t) = M_Y(t)$ for some $t$ in neighborhood of 0, then $F_X(u) = F_Y(u)$ for all $u$\\
+b) If MGF exists $M_X(t) = M_Y(t)$ for some $t$ in neighborhood of 0, then $F_X(u) = F_Y(u)$ for all $u$
 
 
 A sequence of random variables, ${X_i, i = 1, 2, 3, ...}$ each with an MGF $M_{X_i} (t)$. Further suppose $\lim_{i->\infty} M_{X_i} (t) = M_x (t)$ for t in neighborhood of 0, and $M_x(t)$ is also an MGF
 Then: there is a unique CDF $F_X(x)$ whose moments are determined by $M_x (t)$ and $\lim_(i->\infty) F_{X_i} (x) = F_x (x)$
-Basically, if the MGFs of RVs converge to an MGF, then the RVs themselves converge to the RV of the converged MGF\\
+Basically, if the MGFs of RVs converge to an MGF, then the RVs themselves converge to the RV of the converged MGF
 
 
 Lemma: Let $a_1, a_2, a_3 ...$ be a sequence of numbers such that $\lim_{n \to \infty} a_n = a$
-Then: $\lim_{n \to \infty} (1 + \frac{a_n}{n})^n = e^a$\\
+Then: $\lim_{n \to \infty} (1 + \frac{a_n}{n})^n = e^a$
 
 Theorem: Let $Y = aX = b \therefore M_Y (t) = e^{at} M_X (t)$
 
-\section*{Transformations}
-\subsection*{Definition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Transformations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Definition}
 $X$ is a random variable, then $Y = g(X)$ is also a random variable. To find $P(Y)$ we need either $F_Y(y)$ or $f_Y(y)$
 - $g(X)$ maps from $\mathbb{X}$ to $\mathbb{Y}$, basically $\mathbb{S} \rightarrow \mathbb{X} \rightarrow \mathbb{Y}$
 - $\forall A, P(Y \epsilon A) = P(g(X) \epsilon A) = P(\{x \epsilon \mathbb{X}: g(x) = A\}) = P(X \epsilon g^{-1}(A))$
 
-\subsection*{Discrete}
-\disobeylines
+\subsection{Discrete}
+
 \begin{math}
   f_Y(y) = \left\{
     \begin{array}{ll}
@@ -261,7 +300,7 @@ $X$ is a random variable, then $Y = g(X)$ is also a random variable. To find $P(
     \end{array}
   \right.
 \end{math}
-\obeylines\\
+
 
 Steps:
 1) Find $\mathbb{Y}$
@@ -270,13 +309,13 @@ Steps:
 
 
 \subsection*{Continous}
-$F_Y(y) = P(Y = y) = P(g(x) \le y) = \int_{x \epsilon \mathbb{X}: g(x) \le y} f_X(x) dx$\\
+$F_Y(y) = P(Y = y) = P(g(x) \le y) = \int_{x \epsilon \mathbb{X}: g(x) \le y} f_X(x) dx$
 
 If $Y = g(X)$ is monotone, $g^{-1}$ exists. If it's increasing, the inverse is as well (vise versa for decreasing)
 
-If $g(X)$ is increasing, $F_Y(y) = F_X(g^{-1}(y))$. If $g(X)$ is decreasing, $F_Y(y) = -F_X(g^{-1}(y))$. In both:\\
+If $g(X)$ is increasing, $F_Y(y) = F_X(g^{-1}(y))$. If $g(X)$ is decreasing, $F_Y(y) = -F_X(g^{-1}(y))$. In both:
 
-\disobeylines
+
 \begin{math}
   f_Y(y) = \left\{
     \begin{array}{ll}
@@ -285,28 +324,28 @@ If $g(X)$ is increasing, $F_Y(y) = F_X(g^{-1}(y))$. If $g(X)$ is decreasing, $F_
     \end{array}
   \right.
 \end{math}
-\obeylines\\
+
 
 Steps:
 1) Find $\mathbb{Y}$
 2) Find $g^{-1}(y)$
 3) Find $\frac{d}{dy} g^{-1}(y)$
-4) Plug into $f_X(g^{-1})|\frac{d}{dy}g^{-1}(y)$\\
+4) Plug into $f_X(g^{-1})|\frac{d}{dy}g^{-1}(y)$
 
 If the transformation is non-monotonic, all you need to do is find the points of inflection and partition the transformation within ach region of monotinicty
 
-\subsection*{Probability Integral Transform}
+\subsection{Probability Integral Transform}
 NOT SURE IF REALLY NEED (7 Oct 2025)
 
 
-\subsection*{Location Scale Family}
+\subsection{Location Scale Family}
 Let $f_X(x)$ be a PDF and $\mu \epsilon \mathbb{R}, \sigma > 0$, then
 $g(x) = \frac{1}{\sigma} f_X(\frac{x - \mu}{\sigma})$
 This is the case when there exists a $Z$ such that $X = \mu + \sigma Z$
 
-\subsection*{MonteCarlo Integration}
+\subsection{MonteCarlo Integration}
 Write an integral as an expectation:
-$I = \int_a^b h(x) dx = \int_a^b \frac{h(x)}{f_X(x)} f_X(x) dx = \EX[\frac{h(x)}{f_X(x)} I_{(a, b)}(x)]$\\
+$I = \int_a^b h(x) dx = \int_a^b \frac{h(x)}{f_X(x)} f_X(x) dx = \EX[\frac{h(x)}{f_X(x)} I_{(a, b)}(x)]$
 
 Steps: 
 1) Simulate $x_1, ..., x_n$ from $f_X(x)$
@@ -315,10 +354,10 @@ Steps:
 
 $SE(\bar{g}_n) \approx \frac{1}{\sqrt{n}} s.d.(g(x_1), ..., g(x_n))$
 
-\subsection*{Importance Sampling}
+\subsection{Importance Sampling}
 FILL IN STUFF
 
-\subsection*{Oct 30}
+\subsection{Oct 30}
 Ex: $X|Z \sim N(Z, \sigma^2), Y|Z \sim N(Z, \sigma^2), (X \indep Y)|Z$
 We can say: $X = Z + \epsilon_X, Y = Z + \epsilon_Y: \epsilon_x, \epsilon_Y \sim N(0, \sigma^2), Z \sim N(\mu, \tau^2)$
 $Cov(X,Y) = Cov(Z = \epsilon_X, Z + \epsilon_Y) = Cov(Z, Z) = Var(Z) = \tau^2$
@@ -327,16 +366,19 @@ $Var(Y) = Var(Z) + Var(\epsilon_Y) = \tau^2 + \sigma^2$
 $Var(X) = Var(Z) + Var(\epsilon_X) = \tau^2 + \sigma^2$
 $Corr(X, Y) = \frac{Cov(X,Y)}{\sqrt{Var(X)}\sqrt{Var(Y)}} = \frac{\tau^2}{\tau^2 + \sigma^2}$
 
-\subsection*{Law of Total Covariance}
+\subsection{Law of Total Covariance}
 For random variables X, Y, Z, with hierarchy as $(X|Y,Z), (Y|Z), \text{ and } Z$;
 $Cov(X,Y) = \EX[Cov(X, Y|Z)] + Cov(\EX[X|Z], \EX[Y|Z])$
 
 
-\section*{Random Samples and Sums of Random Variables}
-\subsection*{Definition}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Random Samples and Sums of Random Variables}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Definition}
 The random variables $X_1, ..., X_n$ are a random sample of size n from population $f_X(x)$ if $X_i \iiddist f_X(\cdot), i = 1, ..., n$
 
-\subsection*{Joint PDF/PMF}
+\subsection{Joint PDF/PMF}
 $X_1, ..., X_n$ is a random sample. Since they are $iid$, 
 $f(x_1, ..., x_n) = \prod_{i=1}^{n} f_X(x_i)$
 
@@ -344,19 +386,19 @@ Ex. Let $X_1, ..., X_n$ be the failure times in years of the $i^{th}$ identical 
 Assume $X_i \iiddist Exp(\beta)$
 Thus: $f(x_1, ..., x_n) = \prod_{i=1}^{n} \frac{1}{\beta} e^{-x_i / \beta} = \frac{1}{\beta^n} e^{\frac{1}{\beta}\sum X_i}$
 Use this to find:
-$P(X_1 > 2, X_2 > 2, ..., X_n > 2) = [P(X_1 > 2)]^n = [1 - P(X_1 < 2)]^n = [1 - 1 + e^{\frac{-2}{\beta}}]^n = e^{\frac{-2n}{\beta}}$\\
+$P(X_1 > 2, X_2 > 2, ..., X_n > 2) = [P(X_1 > 2)]^n = [1 - P(X_1 < 2)]^n = [1 - 1 + e^{\frac{-2}{\beta}}]^n = e^{\frac{-2n}{\beta}}$
 
 Definition: Sampling Distribution - Let $X_1, ..., X_n$ be a random sample of size n. Let $T(X_1, ..., X_n)$ be a real-valued, real-vector function whose domain includes $\mathbb{X}$.
-Then $T(X_1, ..., X_n)$ is a statistic and its distribution is a sampling distribution. \\
+Then $T(X_1, ..., X_n)$ is a statistic and its distribution is a sampling distribution. 
 
 Common Statistics
 $\bar{X} = \frac{1}{n} \sum_{i=1}^{n} X_i$
 $s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(X_i - \bar{X})^2$
-Order statistics: media, range, etc. \\
+Order statistics: media, range, etc. 
 
 Theorem: Let $x_1, ..., x_n$ be any numbers and $\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$ then:
 a. $\underset{a}{min}\sum_{i=1}^{n} (x_i -a)^2 = \sum_{i=1}^{n} (x_i - \bar{x})^2$ -or- $\bar{x} = \underset{a}{argmin}\sum{_i=1}^{n} (x_i - a)^2$
-b. $(n-1)s^2 = \sum_{i=1}^{n} (x_i - \bar{x})^2 = \sum_{i=1}^{n}x_i^2 - n\bar{x}^2$\\
+b. $(n-1)s^2 = \sum_{i=1}^{n} (x_i - \bar{x})^2 = \sum_{i=1}^{n}x_i^2 - n\bar{x}^2$
 
 Theorem: Let $Z_1, ..., X_n$ be a random sample with population mean and variance $\mu, \sigma^2$, then:
 1) $\EX(\bar{X}) = \mu$
@@ -364,36 +406,112 @@ Theorem: Let $Z_1, ..., X_n$ be a random sample with population mean and varianc
 3) $\EX(s^2) = \sigma^2$
 
 
-\section*{2 Dec 2025}
-\subsection*{Convergence in $r^{th}$ mean}
-A sequence of r.v. $X_1, X_2...$ converges to $X$ in $r^{th}$ mean if $\lim_{n \to \infty} \EX(|X_n - X|^r) = 0$
-Written as: $X_n \overset{L^r}{\to} X$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Convergence}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Proof: Assume $X_n \overset{L^r}{\to} X$. We know then that $\lim_{n \to \infty} \EX(|X_n - X|^r) = 0$. 
+\subsection{Convergence of a Sequence}
+To show a sequence converges to some value $a$, need to show that for every $\epsilon > 0$, there exists some $N \in \mathbb{N}$ such that $n \ge N, |a_n - a| < \epsilon$
+
+Proof Framework: 
+\begin{enumerate}
+  \item Let $\epsilon > 0$ be arbitrary
+  \item Find $N \in \mathbb{N}$. Typically, $N$ is a function of $\epsilon$
+  \item Show that for $n \ge N, |a_n - a| < \epsilon$
+\end{enumerate}
+
+\subsection{Divergence of a Sequence}
+A sequence is said to diverge if it does not converge
+
+Proof Framework:
+\begin{enumerate}
+  \item Assume $a_n$ converges to some $L$
+  \item Show that for some $\epsilon > 0$, there are no positive $N$ which satisfy the convergence criteria
+\end{enumerate}
+
+\subsection{Convergence of a Series}
+A series is said to converge if its partial sums converge to some limit $L$: $S_n = \sum_{i=1}^{n} a_i$
+
+\subsection{Convergence of Functions}
+Pointwise Convergence: For $n \in \mathbb{N}, f_n \to f$ pointwise on A if $\forall x \in A, f_n(x) \to f(x)$
+
+- Need to consider $|f_n(x) - f_n| < \epsilon$ for some $n \le N$
+
+Uniform Convergence: For $n \in \mathbb{N}, f_n \to f$ uniformly on $A$ if $\forall \epsilon > 0$, there is an $N \in \mathbb{N}$ such that $|f_n(x) = f(x)| < \epsilon, \forall x \in A$
+
+
+\subsection{Convergence in Probability}
+$X_n \pto X$
+$$ \forall \epsilon > 0, \lim_{n \to \infty} P(|X-n - X| \ge \epsilon) = 0$$
+-OR-
+$$ \forall \epsilon > 0, \lim_{n \to \infty} P(|X-n - X| < \epsilon) = 1$$
+
+
+\subsection{Chebychev's Inequality}
+Let $X$ be a random variable and $g(x)$ be a non-negative function. Then, for $r > 0$
+$$P(g(x) \ge r) \le \frac{\EX{[g(x)]}}{r}$$
+
+
+\subsection{Moments}
+Let $X$ be a random variable and $g(x) = e^{tX}$. Then:
+$$ P(X > r) = P(g(x) > g(r)) \le \frac{\EX{[g(x)]}}{g(r)} = e^{-rt}M_x(t)$$
+
+
+\subsection{Weak Law of Large Numbers}
+Let $X_1, X_2...$ be iid with $\EX[X_i] = \mu$ and $Var(X_i) = \sigma^2$.
+
+Define $\overline{X}_n = \frac{1}{n}\sum_{i=1}^{n} X_i$. Then: $\overline{X}_n \pto \mu$
+
+
+\subsection{Theorem 5.5.4}
+Suppose $X_1, X_2 ... \pto X$. Let $h(\cdot)$ be a continuous function. Then:
+$$h(X_1), h(X_2)... \pto h(X)$$
+
+
+\subsection{Almost Sure Convergence}
+$X_n \asto X$
+$$\forall \epsilon > 0, P(\lim_{n \to \infty} |X_n - X| < \epsilon) < 1$$
+
+Borel-Cantelli Lemma: Let $E_1, E_2, ...$ be a seuquence of events in some probability space. If the sum of the probability of $E_n$ is finite $\left( \sum_{n=1}^{\infty} P(E_n) < \infty \right)$, then the probability of infinitely many $E_n = 0$
+
+- Useful when we want to show Almost Sure Convergence when $E_n = \left\{ s \in \mathbb{S}: |X_n(s) - X(s)| \ge \epsilon \right\}$
+
+
+\subsection{Strong Law of Large Numbers}
+Let $X_1, X_2...$ be iid with $\EX[X_i] = \mu$ and $Var(X_i) = \sigma^2$. Let $\overline{X}_n = \frac{1}{n} \sum_{n=1}^{n} X_i$. 
+
+Then, for $\epsilon > 0, P(\lim_{n \to \infty} |\overline{X}_n - \mu | < \epsilon) = 1$, i.e., $\overline{X}_n \asto \mu$
+
+
+\subsection{Convergence in $r^{th}$ mean}
+A sequence of r.v. $X_1, X_2...$ converges to $X$ in $r^{th}$ mean if $\lim_{n \to \infty} \EX(|X_n - X|^r) = 0$
+Written as: $X_n \rthto X$
+
+Proof: Assume $X_n \rthto X$. We know then that $\lim_{n \to \infty} \EX(|X_n - X|^r) = 0$. 
 By Chebychev's, $\lim_{n \to \infty} P(|X_n - X| > \epsilon) = \lim_{n \to \infty} P(|X_n - X|^r > \epsilon^r) \le \lim_{n \to \infty} \frac{\EX(|X_n - X|^r)}{\epsilon^r} = 0$
 
 Ex. Let $U \sim Unif(0, 1)$
 $X_1 = I_{[0,1]}^{(u)}$
 $X_2 = I_{[0,1/2]}^{(u)}, X_3 = I_{[1/2,1]}^{(u)}$
 $X_4 = I_{[0,1/3]}^{(u)}, X_5 = I_{[1/3,2/3]}^{(u)}, X_6 = I_{[2/3,1]}^{(u)}...$
-We showed previously that $X_n \overset{P}{\to} 0$ but $X_n \cancel{\overset{a.s.}{\to}} 0$
-What about $X_n \overset{L^r}{\to} 0$?
+We showed previously that $X_n \pto 0$ but $X_n \cancel{\asto} 0$
+What about $X_n \rthto 0$?
 Well, $\lim_{n \to \infty} \EX(|X_n - 0|^r) = \lim_{n \to \infty} \EX((X_n)^r)$
 $X_n$ will either be 0 or 1, depending on the $Unif()$. Thus, $ = \lim_{n \to \infty} \EX((X_n))$. 
 We know $\EX(X_2) = P(0 < u < 1/2) = 1/2)$. This can be applied to all $X_n$'s.
 Thus $ = \lim_{n \to \infty} h(n) = 0$.
-Thus the limit goes to 0, which then means that $X_n \overset{L^r}{\to} 0$. This also implies $X_n \overset{P}{\to} 0$\\~\\
+Thus the limit goes to 0, which then means that $X_n \rthto 0$. This also implies $X_n \pto 0$
 
-If $s > r \ge 1$ then $X_n \overset{L^s}{\to} X \implies X_n \overset{L^r}{\to} X$
+If $s > r \ge 1$ then $X_n \rthto X \implies X_n \rthto X$
 
-\subsection*{Convergence in Distribution}
+\subsection{Convergence in Distribution}
 A sequence of r.v. $X_1, X_2...$ converges in distribution to r.v. $X$ if $\lim_{n \to \infty} F_{X_n}(x) = F_X(x)$ at all points $x$ where $F_X(x)$ is continuous.
-$X_n \overset{D}{\to} X$ is implied by all the other convergences (probability, almost surely, and $r^{th}$ means).
+$X_n \dto X$ is implied by all the other convergences (probability, almost surely, and $r^{th}$ means).
 
 Ex. $X_1, X_2,... \iiddist Unif(0, 1)$. Let's examine $X_{(n)}$ as $n \to \infty$.
 Recall that:
 
-\disobeylines
 \begin{math}
 F_{X_{(n)}}(x) = \left\{
     \begin{array}{ll}
@@ -403,9 +521,7 @@ F_{X_{(n)}}(x) = \left\{
     \end{array}
 \right.
 \end{math}
-\obeylines\\
 
-\disobeylines
 \begin{math}
 lim_{n \to \infty} F_{X_{(n)}}(x) = \left\{
     \begin{array}{ll}
@@ -420,13 +536,11 @@ lim_{n \to \infty} F_{X_{(n)}}(x) = \left\{
     \end{array}
 \right.
 \end{math}
-\obeylines\\
-Note that this is the CDF for a point mass (step function) at 1, so $X_{(n)} \overset{D}{\to} 1$.
+Note that this is the CDF for a point mass (step function) at 1, so $X_{(n)} \dto 1$.
 
 
-Theorem: For a sequence of random variables $X_{(n)} \overset{P}{\to} C$ iff $X_{(n)} \overset{D}{\to} C$
+Theorem: For a sequence of random variables $X_{(n)} \pto C$ iff $X_{(n)} \dto C$
 In words, $P(|X_n - C| > \epsilon) \to 0 \forall \epsilon$ is equivalent to 
-\disobeylines
 \begin{math}
 lim_{n \to \infty} F_{X_{(n)}}(x) = \left\{
     \begin{array}{ll}
@@ -435,23 +549,23 @@ lim_{n \to \infty} F_{X_{(n)}}(x) = \left\{
     \end{array}
 \right.
 \end{math}
-\obeylines\\
+
 
 \subsection{Slowing Down Convergence}
 Sometimes it is helpful to 'slow down' convergence so the limiting distribution isn't a constant. 
 As an example, consider $Y_n = n(1 - X_{(n)})$
 $F(Y_n) = P(Y_N \le y) = P(n(1 - X_{(n)})) = P(1 - \frac{y}{n} \le X_{(n)}) = 1 - P(X_{(n)} \le 1 - \frac{y}{n}) = 1 - (1 - \frac{y}{n})^n$
 Thus, $lim_{n \to \infty} F(Y_n) = lim_{n \to \infty} 1 - (1 - \frac{y}{n})^n = 1 - lim_{n \to \infty}(1 - \frac{y}{n})^n = 1 - e^{-y}$
-Thus $Y_n \overset{D}{\to} Y \sim Exp(1)$
+Thus $Y_n \dto Y \sim Exp(1)$
 
 \subsection{Central Limit Theorem}
 Consider $X_n = \frac{1}{n} \sum_{i=1}^{n} X_i$ for a sequence $X_1, X_2, ...$.
-We have shown: $\bar{X_n} \overset{P}{\to} \mu$, $\bar{X_n} \overset{a.s.}{\to} \mu$
+We have shown: $\bar{X_n} \pto \mu$, $\bar{X_n} \asto \mu$
 Let $X_1, X_2, ...$ be a seuqnce of iid r.v. whose MGFs exist in a neighborhood of 0. Let $\EX(X_i) = \mu$, $Var(X_i) = \sigma^2 > 0$.
 
 Let $X_n = \frac{1}{n} \sum_{i=1}^{n} X_i$. Let $G_n(x)$ be the CDF of $\frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma}$ or $\frac{\bar{X} - \mu}{\sigma/\sqrt{n}}$
 Then for any $x \in \mathbb{R}: lim_{n \to \infty} G_n(x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2\pi}} e^{\frac{1}{2}y^2} dy$ = CDF of Standard Normal.
-Thus, $\frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma} \overset{D}{\to} N(0,1)$, or $Z_n = \frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma}$ and $Z \sim N(0,1), Z_n \overset{D}{\to} Z$
+Thus, $\frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma} \dto N(0,1)$, or $Z_n = \frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma}$ and $Z \sim N(0,1), Z_n \dto Z$
 
 Proof: Let $Y_i = \frac{X_i - \mu}{\sigma}$, $\EX(Y_i) = 0$, $Var(Y_i) = 1$.
 $\frac{1}{n}\sum_{i=1}^{n} Y_i = \frac{1}{\sqrt{n}} \sum_{i=1}^{n} \left(\frac{X_i - \mu}{\sigma}\right)$
@@ -459,5 +573,51 @@ $ = \frac{1}{\sigma\sqrt{n}} \left(\sum_{i=1}^{n} X_i - n\mu\right) = \frac{1}{\
 $ = \frac{\sqrt{n}(\bar{X_n} - \mu)}{\sigma} = Z_n$
 By Thm. 2.3.15, Thm 4.6.7, $M_{Z_n}(t) = \left[M_Y(\frac{t}{\sqrt{n}})\right]^n$
 
+Can also show using a Taylor Series of $M_Y(\frac{t}{\sqrt{n}})$ about $0$:
+$$M_Y(\frac{t}{\sqrt{n}}) = M_Y(0) + M_Y'(0)(\frac{t}{sqrt{n}} - 0) + \frac{M_y'(0)}{2!}(\frac{t}{\sqrt{n}} - 0)^2 + R_n  1 + 0 + \frac{t^2}{2n} + R_n$$
+
+By Thm. 5.5.14, $R_n \to 0$ faster than $\frac{t^2}{2n}$ so $M_{Z_n}(t) = \left[ 1 + \frac{t^2}{2n} + R_n \right]^n$
+
+Thus: $lim_{n \to \infty} M_{Z_n}(t) = lim_{n \to \infty} \left[ 1 + \frac{t^2}{2n} + R_n \right]^n = e^{t^2/2} = M_Z(t) = $ MGF of N(0,1)
+
+\subsection{Slutsky's Theorem}
+If $X_n \dto X$ and $Y_n \pto a$ then:
+\begin{enumerate}
+  \item $Y_n X_n \dto aX$
+  \item $X_n + Y_n \dto X + a$
+\end{enumerate}
+
+\subsection{Delta Method}
+Let $Y_1, Y_2, ...$ be random variables where $\sqrt{n}(Y_n - \theta) \dto N(0, \sigma^2)$. Then, for any $g(\theta)$ where $g'(\theta)$ exists and is not 0:
+$$\sqrt{n}(g(Y_n) - g(\theta)) \dto N(o, \sigma^2(g'(\theta))^2)$$
+
+\subsection{2nd Order Delta Method}
+Let $Y_1, Y_2, ...$ be random variables where $\sqrt{n}(Y_n - \theta) \dto N(0, \sigma^2)$. Then, for any $g(\theta)$ where $g'(\theta) = 0$ and $g''(\theta) \ne 0$:
+$$n(g(Y_n) - g(\theta)) \dto g''(\theta)\frac{\sigma^2}{2}\chi_1^2$$
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Exponential Families}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+A family of PDFs/PMFs with parameter vector $statvec{\theta}$ is called an Exponential Family if it can be expressed as:
+$$f(x|\statvec{\theta}) = h(x)c(\statvec{\theta})exp\left[ \sum_{i=1}^K w_i(\statvec{\theta}) t_i(x) \right]$$
+
+In its canonical (natural) form:
+$$f(x|\statvec{\theta}) = h(x)c^*(\statvec{\eta})exp\left[ \sum_{i=1}^K \eta_i t_i(x) \right]$$
+
+
+\subsection{Expected Value Theorem}
+Where $X$ is a random vairable belonging to the Exponential Family:
+$$\EX \left[ \sum_{i=1}^K \frac{\partial w_i(\statvec{\theta})}{\partial \theta_j} t_i(x) \right] = \frac{-\partial ln(c(\statvec{\theta}))}{\partial \theta_j}$$
+$$Var\left( \sum_{i=1}^K \frac{\partial w_i(\statvec{\theta})}{\partial \theta_j} t_i(x) \right) = \frac{-\partial^2 ln(c(\statvec{\theta}))}{\partial^2 \theta_j} - \EX \left[ \sum_{i=1}^K \frac{\partial^2 w_i(\statvec{\theta})}{\partial^2 \theta_j} t_i(x) \right]$$
+
+In canonical form:
+$$\EX [t_j(x)] = \frac{-\partial ln(c^*(\eta))}{\partial \eta_j}$$
+$$Var[t_j(x)] = \frac{-\partial^2 ln(c^*(\eta))}{\partial^2 \eta_j}$$
 
 \end{document}
