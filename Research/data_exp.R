@@ -24,3 +24,4 @@ plot(pro$week, pro$Temp)
 # Think about what might be the physical interpretations of WHY things interact the way they do
 ### Do a little write-up about all the actual physical features that appear to be important
 ### Do a little write-up about all the statistical features that appear to be important
+
