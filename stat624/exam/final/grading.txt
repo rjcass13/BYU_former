@@ -1,0 +1,25 @@
+* Overall comments
+Strong work on direct sampling, QMC, and numerical integration. Importance sampling has core conceptual issues.
+
+* Direct Sampling [20 pts.] (19/20)
+- Correct inverse-logit sampling and CI.
+- Minor hygiene: consider naming the return elements (-1).
+
+* Importance Sampling [20 pts.] (14/20)
+- Creative attempt at adaptive proposals.
+- Uses the CDF (plogitnorm) instead of h(x) = x in the estimator (-3).
+- Proposal density does not match the actual sampling mechanism (sample_in_support) (-2).
+- Extra plogis transformation is not part of the IS estimator (-1).
+
+* MCMC (Metropolis Algorithm) [20 pts.] (18/20)
+- Valid MH sampler with ESS-based MCSE.
+- 95% CI is missing the z multiplier (qnorm(0.975)) (-2).
+
+* Quasi-Monte Carlo [20 pts.] (20/20)
+- Correct QMC estimator.
+
+* Numerical Integration [20 pts.] (19/20)
+- Correct midpoint integration.
+- A LOTUS-based integral on the normal scale would be more stable for extreme parameters (-1).
+
+Total: 90 of 100 points.

@@ -1,0 +1,7 @@
+simulation.R
+- Your power estimates are quite a bit off. 
+It seems that your gen_test() function only draws x, y once, so your power tests become 0/1 as opposed to a phat estimate. (-5)
+- Small typo in your scaled beta function (-0.5)
+
+sample-size.R
+- You should incorporate MC error into your root evaluation by using the lower-bound, LB(phat)-p = 0 (-2)

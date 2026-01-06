@@ -1,0 +1,81 @@
+\documentclass{beamer}
+
+% Preamble settings for customization
+\usetheme{Madrid} % A popular theme for a clean look
+\usecolortheme{dolphin} % A color scheme to pair with the theme
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+% Presentation metadata
+\title{Welch's T-Test}
+\author{RJ Cass}
+\institute{BYU}
+\date{13 Sep. 2025}
+
+% logo of my university
+\titlegraphic{\centering\includegraphics[width=0.2\textwidth]{BYU_logo.png}}
+
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Table of Contents slide
+\begin{frame}
+    \frametitle{Outline}
+    
+    \tableofcontents
+    
+\end{frame}
+
+% Section 1
+\section{Context}
+
+\begin{frame}{What existed previously?}
+
+    Student's T-Test  
+    $$
+        u = \frac{(\bar{x}_1 - \bar{x}_2)}{\sqrt{\frac{\Sigma_1 + \Sigma_2}{n_1 + n_2 - 2}(\frac{1}{n_1}+\frac{1}{n_2})}}
+    $$
+
+    This test gives the following density for various degrees of freedom
+    
+    \includegraphics[scale=.3]{Student_t_pdf.svg.png}
+
+
+\end{frame}
+
+\begin{frame}{Issues of Existing Analyses}
+    Issues: 
+    \begin{itemize}
+        \item Requires assumption of equal variances
+        \item Cannot be generalized beyond equal variance scenarios
+    \end{itemize} 
+\end{frame}
+
+% Section 2
+\section{Welch's Approach}
+
+\begin{frame}{Equations}
+    \frametitle{Equations}
+    
+    $$
+        v = \frac{(\bar{x}_1 - \bar{x}_2)}{\sqrt{\frac{\Sigma_1}{n_1(n_1 - 1)}+\frac{\Sigma_2}{n_2(n_2 - 1)}}}
+    $$
+    
+\end{frame}
+
+\begin{frame}{Why use Welch's}
+    \frametitle{Why use Welch's}
+
+    \begin{itemize}
+        \item Can generalize for unequal variances
+        \item Less liable to bias
+    \end{itemize}
+
+\end{frame}
+
+\end{document}

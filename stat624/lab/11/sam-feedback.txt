@@ -1,0 +1,28 @@
+This while loop could be vectorized (-1):
+    while ((abs(sum_next - sum_curr) >= 1e-6) & (iter < 100)) {
+      sum_curr <- sum_next
+      sum_next <- choose(2 * m, m) * inner_ratio^m * besselI(kappa1, m) * besselI(kappa2, m)
+      c_sum <- c_sum + sum_next
+      iter <- iter + 1
+      m <- m + 1
+    }
+Update: Reviewed and ok'ed (+1)
+
+Importance-sampler.R:
+This for loop could be vectorized (-1):
+  for (i in 1:sample_size) {
+    x <- sample_proposal(1)
+    w_star[i] <- log_density_target(x) / log_density_proposal(x)
+    x_star[[i]] <- x
+  }
+
+  Also, on the log scale, the division changes to subtraction, which messes up
+  your sampler pretty bad (-3)
+
+There's some miscalculations in your modes it seems like it. These are a little off (-2):
+
+# Bimodal (positive lambda)
+show_vonmises(200, 0, sqrt(2.5), 2, 2, 3)
+
+# Bimodal (negative lambda)
+show_vonmises(200, 0, 0, 1, 3, -4)

@@ -1,0 +1,25 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{mathtools} % loads amsmath
+\usepackage[symbol]{footmisc}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+
+
+\title{Lab 8 - Part A Report}
+\author{By RJ Cass}
+\date{}
+
+\begin{document}
+\maketitle
+
+1. \textit{Description}. In this assignment, we wanted to study how the power of a Paired T-Test compares to the power of a Permuted Paired T-Test over many replications. A permutation is where, for each row in the data, we randomly assign which value is the 'before' and 'after' data point. We are able to do this under the Null Hypothesis that there is no difference in the means of the paired data, so switching the 'before' and 'after values shouldn't make a difference. As such, I ran a process to test the power of these two methods over a range of distributions, sample sizes, and differences in mean. 
+\newline
+
+2. \textit{Execution}. For my two distributions, I used a normal distribution and a $Beta(.1,1)$ distribution. For the sample sizes, I used the values (10, 20, 35). For the differences in means, I used the values (0, .5, 1). I chose to run this test 10,000 times, with 10,000 permutations in each test. 
+\newline
+
+3. \textit{Results}. I ran this study on the Stats-G01 server and it had a Wall time of 9964 seconds (2.77 hours) and a CPU time of 59368 seconds (16.5 hours). The specific results of the study can be found in the 'simulation.Rout' file included in this directory. To summarize the results, what we see is that for small sample sizes, the Permutation T-Test has the ability to perform better than the regular Paired T Test. Due to repeating the test a large number of times, it has the ability to identify if there is a difference in means. However, this ability to do so depends on the initial distribution sampled, and can be subject to more variability. As the sample size increases, the methods perform more equally, and are almost indistinguishable once the sample size is large enough (in my tests, with sample size 35 both methods returned the same results). 
+
+\end{document}
