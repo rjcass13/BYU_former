@@ -1,0 +1,301 @@
+\documentclass{article}
+
+% Preamble settings for customization
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{lmodern}
+\usepackage{animate}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage[margin=1in]{geometry}
+\usepackage[backend=biber, style=ieee]{biblatex} 
+\addbibresource{refs.bib} 
+\renewcommand*{\mkbibacro}[1]{#1} % To avoid an error where it was trying to use an unavailable font size in bib
+\setlength{\parskip}{\baselineskip}
+
+% Presentation metadata
+\title{2D Ising Model Simulation in R}
+\author{RJ Cass}
+\date{5 Dec. 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+    The 2D Ising model is a model composed of a 2-dimensional lattice of nodes where each node can be in one of two orientations see Figure \ref{fig:ising_arrows}. In the Ising model, each node's orientation is determined by the influence of its nearest neighbors, and by the influence of external factors. The Ising model has found use in a variety of fields, from modeling the structure of magnetic materials, to modeling phenomenons such as political alignment of a group of people. In particular, those who study systems that can be modeled using the Ising model would like to know the probability of a certain distribution of nodes (such as all oriented the same way), or the behavior of the system under certain conditions.
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[scale=.3]{images/ising_model_arrows.png}
+        \caption{Representation of a 2D Ising Model \cite{Ta2o_2025}.}
+        \label{fig:ising_arrows}
+    \end{figure}
+
+    
+    Understanding the behavior of the Ising model presents the challenge of scale: the lattice is composed of $N$ nodes, meaning that there are a total of $2^N$ possible configurations of the lattice. While this may be possible to solve analytically for small $N$, as $N$ increases this rapidly leaves the realm of analytical solutions. As such, researches employ Markov chain Monte Carlo (MCMC) methods to sample the distribution of the system to attempt to learn more about the overall qualities. 
+    
+    In this analysis, we will focus on the Ising model representation of a ferromagnetic material. In the case of a ferromagnetic material, the nodes of the Ising model represent each of the magnetic dipoles of the material, where each has an orientation (commonly called spin) of +1 or -1 (positive or negative). In a ferromagentic material, the neighboring nodes exert an influence of alignment: a node well tend to align with the nodes around it. The external influence is the eenrgy of the system, in relation to the energy of the system. Higher temperatures results in nodes being mroe 'active' and spontanesouly flipping their spin. At low temperatures, the influence on a given node is dominated by the nearest neighbors, while at high temperatures the influence is dominated by the temperature of the system. In between, there is a Curie Temperature ($T_C$) around which the influence of the two sources is roughly balanced, resulting in material-wide spontaneous behavior. 
+
+    In this project, we conducted an MCMC study of the behavior of a ferromagnetic material across a range of temperatures. We will examine the Energy, Magnetization, Specific Heat, and Susceptibility of the material across this temperature range.  Importantly, this is not a scientifically rigorous study: we are not attempting to build a full model that can be applied directly to a complete material. For example, for this study we set the Boltzman's constant ($k_b$) to 1, and will be studying the material over a range of unitless temperatures from 1 to 4. The purpose of this study is to understand the setup of this MCMC process, and establish a foundation of the general behavior of these types of materials. This is also an effort to build these tools in R, as most of the work around Ising models has been done in Python, C+, or other lower level languages. 
+
+
+\section{Methods}
+
+    \subsection{MCMC Equations}
+
+        To properly setup the MCMC simulation, we first need to understand how to calculate the influence of the nearest neighbor nodes and the temperature on a given node, as described below.
+
+        \textbf{Hamiltonian} \cite[Eq. 2]{Kotze_2008} - This represents the influence of the nearest neighbors on a given node. 
+        \begin{equation}
+            H_i = -J \sum_{j = 1}^{4} s_i s_j
+            \label{eq:Hamiltonian}
+        \end{equation}
+        In this equation, $J$ represents the coupling constant, where a +1 indicates a ferromagnetic matieral (the nodes tend to align with their neighbors) and a -1 indicates an antiferromagnetic material (the nodes tend to oppose their neighbors). In this study we will use $J = 1$. $s_i$ represents the spin at the node of interest, and $s_j$ represents the spin of the nearest neighbors (in 2D there are 4: above, below, left, right)
+
+        \textbf{Metropolis Ratio} \cite[Eq. 12]{Kotze_2008} - The value used to determine the likelihood of a node flipping its spin. This reprsents the influence of both temperature and the nearest neighbors.
+        \begin{equation}
+            \frac{W(x_i \to x_{i'})}{W(x_{i'} \to x_i)} = \left\{
+                \begin{array}{ll}
+                e^{-\delta H_i \beta}, & \delta H_i < 0\\
+                1,         & \text{otherwise}
+                \end{array}
+            \right.
+            \label{eq:MHRatio}
+        \end{equation}
+        It's important to note that $\delta H_i \ge 0 \implies e^{-\delta H_i \beta} \ge 1$, hence the acceptance ratio is just 1. Also, $\beta = \frac{1}{k_b T}$, $k_b$ is Boltzman's constant, $T$ is Temperature. As mentioned previously, we are using $k_b = 1$ and $~1 \le T \le 5$ (unitless).
+
+    \subsection{Material Properties Equations}
+
+        There are a few material properties we will measure to understand the behavior of the material and different temperatures, as decsribed below
+
+        \textbf{Energy} \cite[Eq. 18]{Kotze_2008} - The overall energy of the material. 
+        \begin{equation}
+            \langle E \rangle = \frac{1}{2} \sum_{i = 1}^{N} H_i
+            \label{eq:Energy}
+        \end{equation}
+        
+        \textbf{Magnetization} \cite[Eq. 17]{Kotze_2008} - The overall magnetization of the material (the average alignment of the nodes of the system).
+        \begin{equation}
+            \langle M \rangle = \frac{1}{N} \sum_{i = 1}^{N} s_i
+            \label{eq:Magnetization}
+        \end{equation}
+        
+        \textbf{Specific Heat} \cite[Eq. 19]{Kotze_2008} - How much energy is required to increase one unit volume of the material by one unit temperature.
+        \begin{equation}
+            C = \frac{\beta}{T}(\langle E^2 \rangle - \langle E \rangle^2)
+            \label{eq:SpecHeat}
+        \end{equation}
+
+        \textbf{Susceptibility} \cite[Eq. 20]{Kotze_2008} - How responsive the material is to an applied magnetic field.
+        \begin{equation}
+            \chi = \beta(\langle M^2 \rangle - \langle M \rangle^2)
+            \label{eq:Sus}
+        \end{equation}
+
+    \subsection{Process}
+
+        At a high level, the process for this MCMC study is to, for a range of temperatures, perform an MCMC study at each temperature to measure the materials properties at each temperature, and generate a distribution of material properties in relation to temperature. It's important to note that in the MCMC process, one 'step' is one arrangement of all the nodes in the material (not just a single node, but the full arrangement of the lattice). 
+
+        One MCMC step requires, for each node in a given lattice:
+        \begin{enumerate}
+            \item Determine the Hamiltonian for that node as shown in Equation \eqref{eq:Hamiltonian}
+            \item Calculate the acceptance ratio shown in Equation \eqref{eq:MHRatio}
+            \item Flip the spin ($s_i = -s_i$) if \textit{runif(1)} is less than the acceptance ratio
+        \end{enumerate}
+        
+        The overall process is:
+        \begin{enumerate}
+            \item Get initial temperature, initialize lattice (random node alignments)
+            \item Perform a number of MCMC steps until the lattice reaches equilibrium (effectively the burn-in). This ensures the properties calculated in the next step are representative of the stable-state of the material, and not dependent on the inital lattice.
+            \item Perform a number of MCMC steps, recording the Energy and Magnetization values at each step 
+            \item Calculate $\langle E \rangle, \langle M \rangle, C, \chi$, and Monte Carlo Error for that temperature value
+            \item Repeat steps 1-4 for each temperature value
+        \end{enumerate}
+
+        As part of this process, I attempted to make my code reuseable, defining functions with sensible parameters that could easily be adapted to different scenarios. The Python code provided by Singh \cite{Singh} offered a nice framework as a launching point for setup. 
+        \begin{enumerate}
+            \item create\_array(): Generates the initial lattice
+            \item calc\_ham(): Calculates the Hamiltonian for a given node
+            \item calc\_energy(): Calculates the energy of the lattice
+            \item calc\_mag(): Calculates the magnetization of the lattice
+            \item mc\_step(): Performs one MCMC step (updates lattice to next state)
+            \item ising\_sim(): For a given temperature sequence, performs MCMC simulation at each temperature and records the metrics at that temperature
+            \item ising\_sim\_plots(): For a given temperature, perform MCMC simulation and plot the lattice at certain points (for display purposes)
+            \item ising\_sim\_mag(): For a given temperature, perform MCMC simulation and plot the magnetization per step
+        \end{enumerate}
+    
+
+\section{Results}
+
+    We conducted simulations on a 5x5 grid (total of 25 nodes) with temperatures between 1 and 4. For each MCMC simulation we use 100 equilibrium steps (the burnin) and 250 MCMC steps. All simulations were run on the same seed (666), resetting the seed in between each simulation to ensure they start on the same lattice. The resulting distirbution of material properties in relation to temperature are shown in Figure \ref{fig:sim_plots}.
+    
+    \begin{figure}[ht!]
+        \centering
+        \begin{subfigure}{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_energy.png}
+            \caption{Energy}
+            \label{fig:sim_energy}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_mag.png}
+            \caption{Magnetization}
+            \label{fig:sim_mag}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_spec_heat.png}
+            \caption{Specific Heat}
+            \label{fig:sim_spec_heat}
+        \end{subfigure}
+
+        \begin{subfigure}[b]{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_sus.png}
+            \caption{Susceptibility}
+            \label{fig:sim_sus}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_mce_eng.png}
+            \caption{MCE Energy}
+            \label{fig:sim_mce_eng}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.3\linewidth}
+            \includegraphics[width=\textwidth]{images/sim_mce_mag.png}
+            \caption{MCE Mag.}
+            \label{fig:sim_mce_mag}
+        \end{subfigure}
+        
+        \caption{Results of a sample MCMC simulation study}
+        \label{fig:sim_plots}
+    \end{figure}
+
+    There are several interesting properties to examine here. First, as expected, energy increases as temperature increases (Figure \ref{fig:sim_energy}); while this is the expecred result, it is confirmation that the the general process of the MCMC study is correct. Looking at the specific heat (Figure \ref{fig:sim_spec_heat}), we see that near the Curie Temperature the spcific heat peaks, because in this temperature range, more energy goes to the activation of the nodes as opposed to heating the material itself. Examining the susceptibility (Figure \ref{fig:sim_sus}) we see similar behavior, where in the 'chaotic' region aroudn the Curie Temperature, the node alignment is very susceptible to outside magnetic fields. Of interest is that the MC Error both appear to follow similar distribution to some of the material properties, with the distribution error of energy being similar to that specific heat (though it does plateau above $T_C$), and the distribution of the error of magnetization similar to that of susceptibility.
+
+    One of the most interesting properties to examine is the magenetization of the material. As described previously, at temperatues below $T_C$, the dipoles tend to align. We can see this in Figure \ref{fig:sim_mag} where lower temperatures have magnetizations very close to +1 or -1, meaning the vast majority of the nodes are aligned the same direction. At high temperatures, the influence on each node is dominated by the energy of the system, resulting in random dipole orientations, which is shown by the magneitzations around 0 (on average, half the dipoles are positive, half are negative). This behavior of alignment (or random distirbution) of nodes is demonstrated in Figures \ref{fig:temp_1_5} to \ref{fig:temp_4}.
+
+    \begin{figure}[ht!]
+        \centering
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_1_5_gif/plot_frame_1.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_1_5_gif/plot_frame_18.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_1_5_gif/plot_frame_30.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_1_5_gif/plot_frame_45.png}
+        \end{subfigure}
+        \caption{Simulation of a low temperature lattice. It reaches a homogenous equilibrium very quickly}
+        \label{fig:temp_1_5}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_2_gif/plot_frame_1.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_2_gif/plot_frame_18.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_2_gif/plot_frame_30.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_2_gif/plot_frame_45.png}
+        \end{subfigure}
+        \caption{Simulation of a medium temperature lattice. It takes longer to reach equilibrium, but does reach it}
+        \label{fig:temp_2}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_4_gif/plot_frame_1.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_4_gif/plot_frame_18.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_4_gif/plot_frame_30.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{temp_4_gif/plot_frame_45.png}
+        \end{subfigure}
+        \caption{Simulation of a high temperature lattice. It never reaches a homogeneous equilibrium, as all node orientations are effectively random}
+        \label{fig:temp_4}
+    \end{figure}
+    
+    
+    Referring back to Figure \ref{fig:sim_mag}, in the range around $T_C$, we see a lot of scattered points in the range from +1 to -1. This is due to behavior called 'phase change', where because the alignment of nodes is relatively balanced between temeprature and the nearest neighbors, the lattice will, on occasion flip from one homogenous orientation to another (ie. the whole lattice flips from negative to positive, or vice versa). To demostrate this behavior, we simulated a smaller lattice (5x5) for a longer amount of time at a temperature of 2.2 (within the 'chaotic' region). This study was also performed on seed 666. The resulting mangeitzation is shown in Figure \ref{fig:phase_change}. This phase change is also demonstrated in Figure \ref{fig:phase_change_grid} which demonstrates the actual lattice arrangement thorughout the study. 
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=.5\textwidth]{images/sim_phase_change.png}
+        \caption{Demontrates the behavior of phase change in a material. Note the spontaneous changes of magentization from positive to negative (or vice versa)}
+        \label{fig:phase_change}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{phase_change_gif/plot_frame_4.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}{0.2\linewidth}
+            \includegraphics[width=\textwidth]{phase_change_gif/plot_frame_26.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{phase_change_gif/plot_frame_33.png}
+        \end{subfigure}
+        \hfil
+        \begin{subfigure}[b]{0.2\linewidth}
+            \includegraphics[width=\textwidth]{phase_change_gif/plot_frame_57.png}
+        \end{subfigure}
+        \caption{Representation of the first 4 phase changes of a 5x5 lattice}
+        \label{fig:phase_change_grid}
+    \end{figure}
+
+
+\section{Conclusion}
+
+    In this project we created an Ising model simulation of ferromagnetic materials via Markov chain Monte Carlo in R. We generated sample distirbution of the material properties over temperature, demonstrating real physical properties such as the spike of specific heat around the Curie Temperature. We also did a deep dive into the behavior of phase change, where the material spontanesouly changes overall magnetization. 
+
+    Were we to dedicate more resources to this study, there are a few adjustments that would be good for making the code more re-usable:
+    \begin{itemize}
+        \item Make the function used for the Metropolis Ratio dynamic, allowing a user to define their own and pass it into the MCMC simulation
+        \item Make the code for plot generation more robust (for both the final MCMC plots, and the lattice plots)
+        \item Optimize the code, and see if it's possible to have it run on grids larger enough to represent real scenarios
+    \end{itemize}
+
+    There are also a few things that we think we would be interesting next steps for study:
+    \begin{itemize}
+        \item Adapt the code to use actual material properties (ie. use real value of $k_b$, $T$, etc.) and use it to imitate acutal materials
+        \item Expand the study to 3D applications (the Metropolis ratio is much more complex than what is used above, but possible)
+        \item Have the Hamiltonian depend on full material (not be just the nearest neighbors)
+    \end{itemize}
+
+
+\newpage
+\section{Bibliography}
+
+
+\printbibliography
+
+
+\end{document}

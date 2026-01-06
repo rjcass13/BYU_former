@@ -1,0 +1,286 @@
+\documentclass{beamer}
+
+% Preamble settings for customization
+\usetheme{Madrid} % A popular theme for a clean look
+\usecolortheme{dolphin} % A color scheme to pair with the theme
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{lmodern}
+\usepackage{animate}
+\usepackage[backend=biber, style=ieee]{biblatex} 
+\addbibresource{refs.bib} 
+\renewcommand*{\mkbibacro}[1]{#1} % To avoid an error where it was trying to use an unavailable font size in bib
+
+% Presentation metadata
+\title{2D Ising Model Simulation in R}
+\author{RJ Cass}
+\institute{BYU}
+\date{5 Dec. 2025}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Table of Contents slide
+\begin{frame}
+    \frametitle{Outline}
+    \tableofcontents
+\end{frame}
+
+\section{Context}
+
+    \begin{frame}{Background}
+        \frametitle{What is an Ising model?}
+        \begin{itemize}
+            \item Array of nodes where each node can be in one of two states (usually represented as +1 and -1)
+            \item Core concept is that each node is influenced by its neighbors, and larger system-wide factors
+            \item Used for modeling in a variety of fields, such as material sciences, epidemiology, even sociology
+            \item As N grows, quickly expands past the bounds of analytical solutions
+        \end{itemize} 
+        
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[scale=.3]{images/ising_model_arrows.png}
+            \caption{Representation of a 2D Ising Model \cite{Ta2o_2025}.}
+            \label{fig:ising_arrows}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}{Ferromagnetism}
+        In ferromagnets, each dipole (node) has a spin (magnetic moment: positive/negative). This alignment is affected by two factors:
+        \begin{itemize}
+            \item Orientation of Neighbors: dipoles tend to align with their neighbors to reduce entropy of system
+            \item Temperature: the external energy from temperature can excite the dipoles and cause their spin to flip spontanesouly
+            \begin{itemize}
+                \item There is a Curie Temperature ($T_C$) above which the energy of the system overwhelms the 'neighborly influence', resulting in random alignment
+            \end{itemize} 
+        \end{itemize} 
+
+        The behavior of a ferromagnetic material can be solved analytically in relatively simple scenarios, but becomes virtually unsolvable for more complex scenarios. 
+    \end{frame}
+
+    \begin{frame}{Goal}
+        \frametitle{Goal/Approach}
+        
+        Goal: We want to better understand the properties of ferromagnetic materials near the Curie Temperature. \\~\\
+
+        Approach: We will use Markov chain Monte Carlo to imitate a ferromagnetic material's behavior over a range of temperatures and investigate its properties.\\~\\
+
+        Note: For this project I am not using actual scientific values (ie. scaling things differently than real-world scenarios). This is not a rigorous study of a real scenario: it's more like a proof of concept of the process.
+
+    \end{frame}
+
+
+% Section 2
+
+\section{Mathematics}
+
+    \begin{frame}{Node Equations}
+
+        \textbf{Hamiltonian} \cite[Eq. 2]{Kotze_2008} - influence of the neighbors on a node
+        \begin{equation}
+            H_i = -J \sum_{j = 1}^{4} s_i s_j
+            \label{eq:Hamiltonian}
+        \end{equation}
+        \begin{itemize}
+            \item $J$: coupling constant (+1: ferromagnetic, -1: antiferromagnetic)
+            \item $s_i$: spin at the node of interest
+            \item $s_j$: spin of the nearest neighbors (in 2D there are 4: above, below, left, right)
+        \end{itemize}
+        
+        \textbf{Metropolis Ratio} \cite[Eq. 12]{Kotze_2008} - influence of temperature and neighbors
+        \begin{equation}
+            \frac{W(x_i \to x_{i'})}{W(x_{i'} \to x_i)} = \left\{
+                \begin{array}{ll}
+                e^{-\delta H_i \beta}, & \delta H_i < 0\\
+                1,         & \text{otherwise}
+                \end{array}
+            \right.
+            \label{eq:MHRatio}
+        \end{equation}
+        \begin{itemize}
+            \item $\delta H_i \ge 0 \implies e^{-\delta H_i \beta} \ge 1$, hence the acceptance ratio is just 1
+            \item $\beta = \frac{1}{k_b T}$, $k_b$ is Boltzman's constant, $T$ is Temperature. For this project I am using $k_b = 1$ and $~1 \le T \le 5$ (unitless)
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Lattice Equations}
+        \textbf{Energy} \cite[Eq. 18]{Kotze_2008}
+        \begin{equation}
+            \langle E \rangle = \frac{1}{2} \sum_{i = 1}^{N} H_i
+            \label{eq:Energy}
+        \end{equation}
+        
+        \textbf{Magnetization} \cite[Eq. 17]{Kotze_2008}
+        \begin{equation}
+            \langle M \rangle = \frac{1}{N} \sum_{i = 1}^{N} s_i
+            \label{eq:Magnetization}
+        \end{equation}
+        
+        \textbf{Specific Heat} \cite[Eq. 19]{Kotze_2008} - How much energy is required to make the elements more 'active' 
+        \begin{equation}
+            C = \frac{\beta}{T}(\langle E^2 \rangle - \langle E \rangle^2)
+            \label{eq:SpecHeat}
+        \end{equation}
+
+        \textbf{Susceptibility} \cite[Eq. 20]{Kotze_2008} - How responsive the material is to an applied magnetic field
+        \begin{equation}
+            \chi = \beta(\langle M^2 \rangle - \langle M \rangle^2)
+            \label{eq:Sus}
+        \end{equation}
+    \end{frame}
+    
+\section{Process}
+    \begin{frame}{Process}
+        \frametitle{Process Outline}
+
+        One MCMC step requires, for each element in a given lattice:
+        \begin{enumerate}
+            \item Determine the Hamiltonian for that element as shown in Equation \eqref{eq:Hamiltonian}
+            \item Calculate the acceptance ratio shown in Equation \eqref{eq:MHRatio}
+            \item Flip the spin ($s_i = -s_i$) if \textit{runif(1)} is less than the acceptance ratio\\~\\
+        \end{enumerate}
+        
+        The overall process is:
+        \begin{enumerate}
+            \item Get initial temperature, initialize lattice (random node alignments)
+            \item Perform a number of MCMC steps until the lattice reaches equilibrium (effectively the burn-in)
+            \item Perform a number of MCMC steps, recording the Energy and Magnetization values at each step 
+            \item Calculate $\langle E \rangle, \langle M \rangle, C, \chi$, MCE for that temperature value
+            \item Repeat steps 1-4 for each temperature value \\~\\
+        \end{enumerate}
+
+        Note: One MCMC 'unit' is the full lattice state, which encapsulates the arrangement of all the nodes
+    \end{frame}
+
+    \begin{frame}{Code}
+        \frametitle{Brief Coding Overview}
+
+        I attempted to make my code reuseable, defining functions with sensible parameters that could easily be adapted. The Python code provided by Singh \cite{Singh} offered a nice framework as a launching point for setup. 
+        \begin{enumerate}
+            \item create\_array(): Generates the initial lattice
+            \item calc\_ham(): Calculates the Hamiltonian for a given node
+            \item calc\_energy(): Calculates the energy of the lattice
+            \item calc\_mag(): Calculates the magnetization of the lattice
+            \item mc\_step(): Performs one MCMC step (updates lattice to next state)
+            \item ising\_sim(): For a given temperature sequence, performs MCMC simulation at each temperature and records the metrics at that temperature
+            \item ising\_sim\_plots(): For a given temperature, perform MCMC simulation and plot the lattice at certain points (for display purposes)
+            \item ising\_sim\_mag(): For a given temperature, perform MCMC simulation and plot the magnetization per step
+        \end{enumerate}
+    
+    \end{frame}
+
+\section{Results}
+    \begin{frame}{Temperature Distributions}
+        \begin{figure}[h!]
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_energy.png}
+                \caption{Energy}
+                \label{fig:sim_energy}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_mag.png}
+                \caption{Magnetization}
+                \label{fig:sim_mag}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_spec_heat.png}
+                \caption{Specific Heat}
+                \label{fig:sim_spec_heat}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_sus.png}
+                \caption{Susceptibility}
+                \label{fig:sim_sus}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_mce_eng.png}
+                \caption{MCE Energy}
+                \label{fig:sim_mce_eng}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_mce_mag.png}
+                \caption{MCE Mag.}
+                \label{fig:sim_mce_mag}
+            \end{minipage}
+        \end{figure}
+    \end{frame}
+
+    % Uncomment this for final build. Leave it commented for faster compile
+    \begin{frame}{Behavior at different temperatures}
+        \begin{figure}[h!]
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \animategraphics[autoplay, loop, width=\textwidth]{4}{temp_1_5_gif/plot_frame_}{1}{45}
+                \caption{Temperature = 1.5}
+                \label{fig:temp1.5_gif}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \animategraphics[autoplay, loop, width=\textwidth]{4}{temp_2_gif/plot_frame_}{1}{45}
+                \caption{Temperature = 2}
+                \label{fig:temp2_gif}
+            \end{minipage}
+            \begin{minipage}[b]{0.3\linewidth}
+                \centering
+                \animategraphics[autoplay, loop, width=\textwidth]{4}{temp_4_gif/plot_frame_}{1}{45}
+                \caption{Temperature = 4}
+                \label{fig:temp4_gif}
+            \end{minipage}
+        \end{figure}
+    \end{frame}
+
+    % Uncomment this for final build. Leave it commented for faster compile
+    \begin{frame}{Magnetization Phase Change}
+        \begin{figure}[h!]
+            \begin{minipage}[b]{0.45\linewidth}
+                \centering
+                \includegraphics[width=\textwidth]{images/sim_phase_change.png}
+                \caption{Magnetization at each simulation step showing spontaneous phase change}
+                \label{fig:phase_change}
+            \end{minipage}
+            \begin{minipage}[b]{0.45\linewidth}
+                \centering
+                \animategraphics[autoplay, loop, width=\textwidth]{4}{phase_change_gif/plot_frame_}{1}{101}
+                \caption{Animation showing spontaneous phase change}
+                \label{fig:phase_change_gif}
+            \end{minipage}
+        \end{figure}
+    \end{frame}
+
+
+\section{Conclusion}
+    \begin{frame}{Next Steps - Code}
+        There are a few adjustments that would be good for making my code more re-usable
+        \begin{itemize}
+            \item Make the function used for the Metropolis Ratio dynamic, allowing a user to define their own and pass it in
+            \item Make the code for plot generation more robust (for both the final MCMC plots, and the lattice plots)
+            \item Optimize, find a way to make it run fast enough to operate on grids that are magnitudes larger than what I tested
+        \end{itemize}
+
+        There are a few things that, using what I currently have, would be interesting next steps
+        \begin{itemize}
+            \item Adapt the code to use actual material properties (ie. use real value of $k_b$, $T$, etc.)
+            \item This can be expanded into 3D applications generally (the Metropolis ratio is much more complex in my scenario, but possible)
+            \item An actual field of study: how to make this work not just looking at nearest neighbor, but have the Hamiltonian depend on full material (Dr. Page)
+        \end{itemize}
+    \end{frame}
+
+\section{Appendix}
+    \begin{frame}{Bibliography}
+        \frametitle{Bibliography}
+
+        \printbibliography
+
+    \end{frame}
+
+\end{document}

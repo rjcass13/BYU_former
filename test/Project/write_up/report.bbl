@@ -1,0 +1,110 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{Ta2o_2025}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=f7596b5faa2301a94aa1bb1e12e1f46d}{%
+           family={Ta2o},
+           familyi={T\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Wikimedia Foundation}%
+      }
+      \strng{namehash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{fullhash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{fullhashraw}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{bibnamehash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{authorbibnamehash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{authornamehash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{authorfullhash}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \strng{authorfullhashraw}{f7596b5faa2301a94aa1bb1e12e1f46d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Wikipedia}
+      \field{month}{9}
+      \field{title}{Ising model}
+      \field{year}{2025}
+      \verb{urlraw}
+      \verb https://en.wikipedia.org/wiki/Ising_model#/media/File:2D_ising_model_on_lattice.svg
+      \endverb
+      \verb{url}
+      \verb https://en.wikipedia.org/wiki/Ising_model#/media/File:2D_ising_model_on_lattice.svg
+      \endverb
+    \endentry
+    \entry{Kotze_2008}{article}{}{}
+      \name{author}{1}{}{%
+        {{hash=5f609ed7017117a9936211d5e32168e4}{%
+           family={Kotze},
+           familyi={K\bibinitperiod},
+           given={Jacques},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{fullhash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{fullhashraw}{5f609ed7017117a9936211d5e32168e4}
+      \strng{bibnamehash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{authorbibnamehash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{authornamehash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{authorfullhash}{5f609ed7017117a9936211d5e32168e4}
+      \strng{authorfullhashraw}{5f609ed7017117a9936211d5e32168e4}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv:0803.0217v1 [cond-mat.stat-mech]}
+      \field{title}{Introduction to Monte Carlo methods for an Ising Model of a Ferromagnet}
+      \field{year}{2008}
+    \endentry
+    \entry{Singh}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=e5a71cee03c976c8b5ea85f877295be3}{%
+           family={Singh},
+           familyi={S\bibinitperiod},
+           given={Rajesh},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{fullhash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{fullhashraw}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{bibnamehash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{authorbibnamehash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{authornamehash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{authorfullhash}{e5a71cee03c976c8b5ea85f877295be3}
+      \strng{authorfullhashraw}{e5a71cee03c976c8b5ea85f877295be3}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Rajeshrinet Blog}
+      \field{title}{Ising Model}
+      \verb{urlraw}
+      \verb https://rajeshrinet.github.io/blog/2014/ising-model/
+      \endverb
+      \verb{url}
+      \verb https://rajeshrinet.github.io/blog/2014/ising-model/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
